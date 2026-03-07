@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react'
-import { carregarDados, CATEGORIAS, SCORE_THRESHOLD } from './lib/data'
+import { carregarDados, salvarDados, CATEGORIAS, SCORE_THRESHOLD } from './lib/data'
 import { recalcularScores } from './lib/score'
 import { formatarParaWhatsApp } from './lib/formatWhatsApp'
 import CategoriaCard from './components/CategoriaCard'
 import BarraAcoes from './components/BarraAcoes'
 import AdicionarItemNovo from './components/AdicionarItemNovo'
 import Historico from './components/Historico'
+import ConfigToken, { getToken, getRepo } from './components/ConfigToken'
 
 export default function App() {
   const [dados, setDados] = useState(null)
   const [listaAtual, setListaAtual] = useState([])
   const [view, setView] = useState('lista')
+  const [configAberto, setConfigAberto] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -89,19 +91,52 @@ export default function App() {
     await navigator.clipboard.writeText(texto)
   }
 
-  function handleConfirmar() {
+  async function handleConfirmar() {
     const checkedItens = listaAtual.filter((i) => i.checked)
-    const hoje = new Date().toISOString().split('T')[0]
+    if (checkedItens.length === 0) return
+
     const novaLista = {
-      data: hoje,
-      itens: checkedItens.map((i) => ({
-        catalogoId: i.id,
-        quantidade: i.quantidade,
-      })),
+      data: new Date().toISOString().slice(0, 10),
+      itens: checkedItens.map((i) => ({ catalogoId: i.id, quantidade: i.quantidade })),
     }
+
+    // Add new items to catalogo
+    const novosCatalogo = [...dados.catalogo]
+    for (const item of checkedItens) {
+      if (!novosCatalogo.some((c) => c.id === item.id)) {
+        novosCatalogo.push({
+          id: item.id,
+          nome: item.nome,
+          categoria: item.categoria,
+          quantidadePadrao: item.quantidade,
+          unidade: '',
+          detalhes: item.detalhes || '',
+          marca: item.marca || '',
+          score: 0,
+        })
+      }
+    }
+
     const novoHistorico = [...dados.historico, novaLista]
-    const catalogoAtualizado = recalcularScores(dados.catalogo, novoHistorico)
-    setDados({ catalogo: catalogoAtualizado, historico: novoHistorico })
+    const catalogoAtualizado = recalcularScores(novosCatalogo, novoHistorico)
+    const novosDados = { catalogo: catalogoAtualizado, historico: novoHistorico }
+
+    // Update local state
+    setDados(novosDados)
+
+    // Try to save to GitHub
+    const token = getToken()
+    const repo = getRepo()
+    if (token && repo) {
+      try {
+        await salvarDados(novosDados, token, repo)
+        alert('Lista confirmada e salva!')
+      } catch (err) {
+        alert(`Lista confirmada localmente, mas erro ao salvar no GitHub: ${err.message}`)
+      }
+    } else {
+      alert('Lista confirmada! Configure o GitHub nas ⚙️ para salvar permanentemente.')
+    }
   }
 
   if (loading) {
@@ -130,6 +165,12 @@ export default function App() {
             className="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors duration-200 active:bg-gray-100"
           >
             {view === 'lista' ? 'Historico' : 'Voltar'}
+          </button>
+          <button
+            onClick={() => setConfigAberto(true)}
+            className="text-sm px-2 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors duration-200 active:bg-gray-100"
+          >
+            ⚙️
           </button>
         </div>
       </header>
@@ -169,6 +210,8 @@ export default function App() {
       {view === 'lista' && (
         <BarraAcoes onCopiar={handleCopiar} onConfirmar={handleConfirmar} />
       )}
+
+      <ConfigToken aberto={configAberto} onFechar={() => setConfigAberto(false)} />
     </div>
   )
 }
