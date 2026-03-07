@@ -13,12 +13,12 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
 
   return (
     <div
-      className={`flex items-center gap-3 p-3 rounded-lg transition-opacity ${
+      className={`flex items-center gap-3 p-3 rounded-lg transition-opacity duration-200 ${
         checked ? '' : 'opacity-50'
       }`}
     >
       {/* Checkbox */}
-      <label className="relative flex items-center cursor-pointer">
+      <label className="relative flex items-center cursor-pointer min-w-[44px] min-h-[44px] justify-center">
         <input
           type="checkbox"
           checked={checked}
@@ -26,7 +26,7 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
           className="sr-only peer"
         />
         <span
-          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200 ${
             checked
               ? 'bg-[#2D6A4F] border-[#2D6A4F]'
               : 'border-gray-400 bg-white'
@@ -49,7 +49,7 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
         <button
           type="button"
           onClick={() => handleQuantidadeChange(-1)}
-          className="w-6 h-6 flex items-center justify-center rounded bg-gray-200 text-gray-700 text-sm font-bold leading-none"
+          className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 text-sm font-bold leading-none transition-colors duration-200 hover:bg-gray-200 active:bg-gray-300"
           aria-label="diminuir quantidade"
         >
           -
@@ -63,7 +63,7 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
         <button
           type="button"
           onClick={() => handleQuantidadeChange(1)}
-          className="w-6 h-6 flex items-center justify-center rounded bg-gray-200 text-gray-700 text-sm font-bold leading-none"
+          className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 text-sm font-bold leading-none transition-colors duration-200 hover:bg-gray-200 active:bg-gray-300"
           aria-label="aumentar quantidade"
         >
           +
@@ -72,7 +72,7 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
 
       {/* Name + details */}
       <div className="flex flex-col min-w-0">
-        <span className={`font-bold text-sm ${checked ? '' : 'line-through'}`}>
+        <span className={`font-semibold text-sm ${checked ? '' : 'line-through'}`} style={{ color: '#1A1A1A' }}>
           {nome}
         </span>
         {(detalhes || marca) && (

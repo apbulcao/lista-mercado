@@ -106,8 +106,9 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FAFAF8' }}>
-        <span className="text-gray-400">Carregando...</span>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3" style={{ backgroundColor: '#FAFAF8' }}>
+        <div className="w-8 h-8 border-3 border-gray-200 border-t-[#2D6A4F] rounded-full animate-spin" />
+        <span className="text-sm text-gray-400">Carregando...</span>
       </div>
     )
   }
@@ -126,7 +127,7 @@ export default function App() {
           <span className="text-sm text-gray-500">{diaFormatado}</span>
           <button
             onClick={() => setView(view === 'lista' ? 'historico' : 'lista')}
-            className="text-sm font-medium px-3 py-1 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50"
+            className="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors duration-200 active:bg-gray-100"
           >
             {view === 'lista' ? 'Historico' : 'Voltar'}
           </button>

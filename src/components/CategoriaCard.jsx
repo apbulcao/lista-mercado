@@ -64,7 +64,7 @@ export default function CategoriaCard({
           <button
             type="button"
             onClick={() => setDropdownAberto(!dropdownAberto)}
-            className="text-sm text-[#2D6A4F] font-medium hover:underline cursor-pointer"
+            className="text-sm text-[#2D6A4F] font-medium hover:underline cursor-pointer py-1 transition-colors duration-200"
           >
             + Adicionar
           </button>
@@ -78,7 +78,7 @@ export default function CategoriaCard({
                     placeholder="Buscar..."
                     value={filtro}
                     onChange={(e) => setFiltro(e.target.value)}
-                    className="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-green-600"
+                    className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 focus:border-[#2D6A4F] transition-colors duration-200"
                     autoFocus
                   />
                 </div>
@@ -93,7 +93,7 @@ export default function CategoriaCard({
                     key={extra.id}
                     type="button"
                     onClick={() => handleAdicionarClick(extra.id)}
-                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer"
+                    className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors duration-200"
                   >
                     {extra.nome}
                     {extra.quantidadePadrao && (
