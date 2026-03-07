@@ -1,5 +1,5 @@
 export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
-  const { id, nome, quantidade, detalhes, marca, checked } = item
+  const { id, nome, quantidade, unidade, detalhes, marca, checked } = item
 
   function handleQuantidadeChange(delta) {
     const current = parseInt(quantidade, 10) || 0
@@ -68,6 +68,9 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
         >
           +
         </button>
+        {unidade && (
+          <span className="text-xs text-gray-500 ml-0.5">{unidade}</span>
+        )}
       </div>
 
       {/* Name + details */}

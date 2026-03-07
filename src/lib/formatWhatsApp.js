@@ -18,7 +18,9 @@ export function formatarParaWhatsApp(itens, dataISO) {
 
     texto += `\n*${CATEGORIA_LABELS[catId]}*:\n`
     for (const item of catItens) {
-      let linha = `- ${item.quantidade} ${item.nome}`
+      let linha = item.unidade
+        ? `- ${item.quantidade} ${item.unidade} ${item.nome}`
+        : `- ${item.quantidade} ${item.nome}`
       if (item.detalhes) linha += ` ${item.detalhes}`
       if (item.marca) linha += ` ${item.marca}`
       texto += `${linha}\n`
