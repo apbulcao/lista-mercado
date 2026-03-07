@@ -35,6 +35,26 @@ describe('recalcularScores', () => {
     expect(result[0].score).toBeLessThan(0.3)
   })
 
+  it('atualiza quantidadePadrao para a mais frequente', () => {
+    const catalogo = [{ id: '1', nome: 'banana', score: 0, quantidadePadrao: '6' }]
+    const historico = [
+      { data: '2026-03-01', itens: [{ catalogoId: '1', quantidade: '10' }] },
+      { data: '2026-03-08', itens: [{ catalogoId: '1', quantidade: '10' }] },
+      { data: '2026-03-15', itens: [{ catalogoId: '1', quantidade: '6' }] },
+    ]
+    const result = recalcularScores(catalogo, historico)
+    expect(result[0].quantidadePadrao).toBe('10')
+  })
+
+  it('mantém quantidadePadrao se item não aparece no histórico', () => {
+    const catalogo = [{ id: '1', nome: 'novo', score: 0, quantidadePadrao: '3' }]
+    const historico = [
+      { data: '2026-03-01', itens: [] },
+    ]
+    const result = recalcularScores(catalogo, historico)
+    expect(result[0].quantidadePadrao).toBe('3')
+  })
+
   it('item novo sem histórico tem score 0', () => {
     const catalogo = [{ id: '1', nome: 'novo', score: 0 }]
     const historico = [
