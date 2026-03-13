@@ -12,8 +12,8 @@ export default function Historico({ historico, catalogo }) {
 
   return (
     <div className="space-y-6">
-      {sorted.map(lista => (
-        <div key={lista.data} className="bg-white rounded-xl shadow-sm overflow-hidden">
+      {sorted.map((lista, index) => (
+        <div key={lista.id || `${lista.data}-${index}`} className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b" style={{ backgroundColor: '#f0fdf4' }}>
             <h3 className="font-semibold" style={{ color: '#2D6A4F' }}>
               📅 {formatDate(lista.data)}

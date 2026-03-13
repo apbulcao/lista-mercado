@@ -2,8 +2,9 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
   const { id, nome, quantidade, unidade, detalhes, marca, checked } = item
 
   function handleQuantidadeChange(delta) {
-    const current = parseInt(quantidade, 10) || 0
-    const next = Math.max(0, current + delta)
+    const current = parseInt(quantidade, 10)
+    const base = Number.isNaN(current) || current < 1 ? 1 : current
+    const next = Math.max(1, base + delta)
     onQuantidadeChange(id, String(next))
   }
 

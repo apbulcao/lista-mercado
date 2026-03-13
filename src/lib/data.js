@@ -1,8 +1,55 @@
 const DATA_PATH = 'data.json'
+const STORAGE_KEY_PENDING_DATA = 'lista-mercado-dados-pendentes'
+
+function parseJsonSafe(value) {
+  try {
+    return JSON.parse(value)
+  } catch {
+    return null
+  }
+}
+
+function carregarSnapshotPendente() {
+  const raw = localStorage.getItem(STORAGE_KEY_PENDING_DATA)
+  if (!raw) return null
+
+  const snapshot = parseJsonSafe(raw)
+  if (
+    !snapshot?.dados ||
+    !Array.isArray(snapshot.dados.catalogo) ||
+    !Array.isArray(snapshot.dados.historico)
+  ) {
+    return null
+  }
+
+  return snapshot
+}
 
 export async function carregarDados() {
-  const res = await fetch(`${import.meta.env.BASE_URL}${DATA_PATH}`)
-  return res.json()
+  const snapshotPendente = carregarSnapshotPendente()
+
+  try {
+    const res = await fetch(`${import.meta.env.BASE_URL}${DATA_PATH}`)
+    if (!res.ok) {
+      throw new Error('Nao foi possivel carregar os dados do projeto')
+    }
+
+    const dadosRemotos = await res.json()
+    if (
+      snapshotPendente &&
+      snapshotPendente.dados.historico.length > dadosRemotos.historico.length
+    ) {
+      return snapshotPendente.dados
+    }
+
+    return dadosRemotos
+  } catch (error) {
+    if (snapshotPendente) {
+      return snapshotPendente.dados
+    }
+
+    throw error
+  }
 }
 
 export const CATEGORIAS = [
@@ -15,14 +62,44 @@ export const CATEGORIAS = [
 
 export const SCORE_THRESHOLD = 0.5
 
+export function salvarDadosPendentes(dados) {
+  localStorage.setItem(
+    STORAGE_KEY_PENDING_DATA,
+    JSON.stringify({
+      savedAt: new Date().toISOString(),
+      dados,
+    })
+  )
+}
+
+export function limparDadosPendentes() {
+  localStorage.removeItem(STORAGE_KEY_PENDING_DATA)
+}
+
+async function parseErrorResponse(response) {
+  const payload = await response.text()
+  const json = parseJsonSafe(payload)
+  return json?.message || payload || null
+}
+
 export async function salvarDados(dados, token, repo) {
   const path = 'public/data.json'
 
   // Get current file SHA
-  const meta = await fetch(
+  const metaResponse = await fetch(
     `https://api.github.com/repos/${repo}/contents/${path}`,
     { headers: { Authorization: `Bearer ${token}` } }
-  ).then(r => r.json())
+  )
+
+  if (!metaResponse.ok) {
+    const message = await parseErrorResponse(metaResponse)
+    throw new Error(message || 'Erro ao buscar a versao atual do arquivo no GitHub')
+  }
+
+  const meta = await metaResponse.json()
+  if (!meta.sha) {
+    throw new Error('Nao foi possivel identificar a versao atual do arquivo no GitHub')
+  }
 
   // Update via GitHub API
   const response = await fetch(
@@ -42,7 +119,7 @@ export async function salvarDados(dados, token, repo) {
   )
 
   if (!response.ok) {
-    const err = await response.json()
-    throw new Error(err.message || 'Erro ao salvar')
+    const message = await parseErrorResponse(response)
+    throw new Error(message || 'Erro ao salvar')
   }
 }

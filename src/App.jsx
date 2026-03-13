@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react'
-import { carregarDados, salvarDados, CATEGORIAS, SCORE_THRESHOLD } from './lib/data'
+import {
+  carregarDados,
+  salvarDados,
+  salvarDadosPendentes,
+  limparDadosPendentes,
+  CATEGORIAS,
+  SCORE_THRESHOLD,
+} from './lib/data'
 import { recalcularScores } from './lib/score'
 import { formatarParaWhatsApp } from './lib/formatWhatsApp'
+import { criarIdItem, quantidadeValida, slugifyNomeItem, normalizarQuantidade } from './lib/itemUtils'
 import CategoriaCard from './components/CategoriaCard'
 import BarraAcoes from './components/BarraAcoes'
 import AdicionarItemNovo from './components/AdicionarItemNovo'
@@ -14,9 +22,14 @@ export default function App() {
   const [view, setView] = useState('lista')
   const [configAberto, setConfigAberto] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [erroCarregamento, setErroCarregamento] = useState('')
 
-  useEffect(() => {
-    carregarDados().then((d) => {
+  async function carregarApp() {
+    setLoading(true)
+    setErroCarregamento('')
+
+    try {
+      const d = await carregarDados()
       const catalogoComScores = recalcularScores(d.catalogo, d.historico)
       const sugeridos = catalogoComScores
         .filter((item) => item.score >= SCORE_THRESHOLD)
@@ -27,8 +40,15 @@ export default function App() {
         }))
       setDados({ catalogo: catalogoComScores, historico: d.historico })
       setListaAtual(sugeridos)
+    } catch (err) {
+      setErroCarregamento(err.message || 'Nao foi possivel carregar os dados.')
+    } finally {
       setLoading(false)
-    })
+    }
+  }
+
+  useEffect(() => {
+    carregarApp()
   }, [])
 
   function handleToggle(id) {
@@ -42,7 +62,7 @@ export default function App() {
   function handleQuantidadeChange(id, novaQtd) {
     setListaAtual((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, quantidade: novaQtd } : item
+        item.id === id ? { ...item, quantidade: normalizarQuantidade(novaQtd) } : item
       )
     )
   }
@@ -58,12 +78,22 @@ export default function App() {
   }
 
   function handleAdicionarNovo(nome, categoria) {
-    const id = nome
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '')
+    const slugBase = slugifyNomeItem(nome)
+    if (!slugBase) {
+      alert('Digite um nome de item valido.')
+      return
+    }
+
+    const itemExistente = dados.catalogo.find(
+      (item) => item.id === slugBase || slugifyNomeItem(item.nome) === slugBase
+    )
+
+    if (itemExistente) {
+      handleAdicionarDoCatalogo(itemExistente.id)
+      return
+    }
+
+    const id = criarIdItem(nome, dados.catalogo)
     const novoItem = {
       id,
       nome,
@@ -84,18 +114,37 @@ export default function App() {
     ])
   }
 
+  function getItensSelecionadosValidos() {
+    const checkedItens = listaAtual.filter((item) => item.checked)
+    if (checkedItens.length === 0) {
+      alert('Selecione pelo menos um item para continuar.')
+      return null
+    }
+
+    const itemInvalido = checkedItens.find((item) => !quantidadeValida(item.quantidade))
+    if (itemInvalido) {
+      alert(`Quantidade invalida para "${itemInvalido.nome}". Use um numero maior que zero.`)
+      return null
+    }
+
+    return checkedItens
+  }
+
   async function handleCopiar() {
-    const checkedItens = listaAtual.filter((i) => i.checked)
+    const checkedItens = getItensSelecionadosValidos()
+    if (!checkedItens) return
+
     const hoje = new Date().toISOString().split('T')[0]
     const texto = formatarParaWhatsApp(checkedItens, hoje)
     await navigator.clipboard.writeText(texto)
   }
 
   async function handleConfirmar() {
-    const checkedItens = listaAtual.filter((i) => i.checked)
-    if (checkedItens.length === 0) return
+    const checkedItens = getItensSelecionadosValidos()
+    if (!checkedItens) return
 
     const novaLista = {
+      id: `lista-${Date.now()}`,
       data: new Date().toISOString().slice(0, 10),
       itens: checkedItens.map((i) => ({ catalogoId: i.id, quantidade: i.quantidade })),
     }
@@ -130,12 +179,15 @@ export default function App() {
     if (token && repo) {
       try {
         await salvarDados(novosDados, token, repo)
+        limparDadosPendentes()
         alert('Lista confirmada e salva!')
       } catch (err) {
-        alert(`Lista confirmada localmente, mas erro ao salvar no GitHub: ${err.message}`)
+        salvarDadosPendentes(novosDados)
+        alert(`Lista confirmada e salva neste dispositivo, mas houve erro ao salvar no GitHub: ${err.message}`)
       }
     } else {
-      alert('Lista confirmada! Configure o GitHub nas ⚙️ para salvar permanentemente.')
+      salvarDadosPendentes(novosDados)
+      alert('Lista confirmada e salva neste dispositivo. Configure o GitHub nas ⚙️ para sincronizar permanentemente.')
     }
   }
 
@@ -144,6 +196,28 @@ export default function App() {
       <div className="min-h-screen flex flex-col items-center justify-center gap-3" style={{ backgroundColor: '#FAFAF8' }}>
         <div className="w-8 h-8 border-3 border-gray-200 border-t-[#2D6A4F] rounded-full animate-spin" />
         <span className="text-sm text-gray-400">Carregando...</span>
+      </div>
+    )
+  }
+
+  if (erroCarregamento) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#FAFAF8' }}>
+        <div className="max-w-sm w-full bg-white rounded-xl shadow-sm p-5 space-y-4 text-center">
+          <div className="space-y-2">
+            <h1 className="text-lg font-bold" style={{ color: '#1A1A1A' }}>
+              Lista Mercado
+            </h1>
+            <p className="text-sm text-gray-600">{erroCarregamento}</p>
+          </div>
+          <button
+            onClick={carregarApp}
+            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-colors duration-200 hover:opacity-90"
+            style={{ backgroundColor: '#2D6A4F' }}
+          >
+            Tentar novamente
+          </button>
+        </div>
       </div>
     )
   }
