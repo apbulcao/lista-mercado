@@ -41,7 +41,7 @@ export async function salvarFeedback(texto, token, repo) {
   const base64Content = btoa(utf8Bytes)
 
   const body = {
-    message: 'docs: adicina novo feedback de usuario',
+    message: 'docs: adiciona novo feedback de usuario',
     content: base64Content,
   }
   if (sha) body.sha = sha

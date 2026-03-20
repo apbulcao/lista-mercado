@@ -33,7 +33,7 @@ export default function FeedbackModal() {
 
   return (
     <>
-      <div className="fixed bottom-4 left-4 z-40">
+      <div className="fixed bottom-20 left-4 z-40">
         <button
           onClick={() => setAberto(true)}
           className="bg-white text-gray-700 shadow-md border border-gray-100 hover:bg-gray-50 rounded-full px-4 py-3 flex items-center gap-2 font-medium text-sm transition-transform hover:scale-105"

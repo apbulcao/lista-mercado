@@ -30,7 +30,12 @@ export default function SmartInput({ onAddItems }) {
         throw new Error('Formato retornado inválido')
       }
 
-      onAddItems(items)
+      const validItems = items.filter(i => i.nome && typeof i.nome === 'string')
+      if (validItems.length === 0) {
+        throw new Error('Nenhum item reconhecido')
+      }
+
+      onAddItems(validItems)
       setText('')
     } catch (err) {
       console.error(err)

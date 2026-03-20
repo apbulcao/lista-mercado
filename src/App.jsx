@@ -139,10 +139,11 @@ export default function App() {
         }
       } else {
         const id = criarIdItem(item.nome, [...dados.catalogo, ...novosItensCatalogo])
+        const categoriasValidas = CATEGORIAS.map(c => c.id)
         const novoItem = {
           id,
           nome: item.nome,
-          categoria: 'outros',
+          categoria: categoriasValidas.includes(item.categoria) ? item.categoria : 'outros',
           quantidadePadrao: item.quantidadePadrao || '1',
           unidade: item.unidade || '',
           detalhes: '',

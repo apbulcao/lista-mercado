@@ -5,11 +5,12 @@ EACH object MUST have exactly these properties:
 - "nome": string (the name of the item, capitalized first letter)
 - "quantidadePadrao": string (only numbers, e.g. "1", "2")
 - "unidade": string (e.g. "unidade", "kg", "g", "l", "ml")
+- "categoria": string (one of: "legumes", "frutas", "carnes", "laticinios", "outros")
 
 If the user does not specify a quantity, default to "1" and "unidade".
 Do NOT return anything except the JSON array. Do not use markdown blocks, just the raw JSON.
 Example user input: "Vou querer 1 leite e carne"
-Output: [{"nome": "Leite", "quantidadePadrao": "1", "unidade": "unidade"}, {"nome": "Carne", "quantidadePadrao": "1", "unidade": "unidade"}]
+Output: [{"nome": "Leite", "quantidadePadrao": "1", "unidade": "unidade", "categoria": "laticinios"}, {"nome": "Carne", "quantidadePadrao": "1", "unidade": "unidade", "categoria": "carnes"}]
 `.trim()
 
 export function buildAiPayload(provider, text, apiKey, customUrl) {
