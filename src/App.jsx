@@ -121,11 +121,14 @@ export default function App() {
     const itensParaAdicionar = items.filter(i => i.acao !== 'remove')
     const itensParaRemover = items.filter(i => i.acao === 'remove')
 
-    // Remove items
+    // Remove items (partial match: "leite" matches "leite integral")
     if (itensParaRemover.length > 0) {
       const slugsRemover = itensParaRemover.map(i => slugifyNomeItem(i.nome))
       setListaAtual((prev) =>
-        prev.filter((l) => !slugsRemover.includes(slugifyNomeItem(l.nome)))
+        prev.filter((l) => {
+          const slugItem = slugifyNomeItem(l.nome)
+          return !slugsRemover.some(sr => slugItem === sr || slugItem.includes(sr))
+        })
       )
     }
 
