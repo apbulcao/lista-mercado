@@ -1,16 +1,22 @@
 const SYSTEM_PROMPT = `
-You are a grocery shopping assistant. The user will provide a sentence.
-Extract the ingredients and quantities. Convert them into a valid JSON array of objects.
-EACH object MUST have exactly these properties:
-- "nome": string (the name of the item, capitalized first letter)
-- "quantidadePadrao": string (only numbers, e.g. "1", "2")
-- "unidade": string (e.g. "unidade", "kg", "g", "l", "ml")
-- "categoria": string (one of: "legumes", "frutas", "carnes", "laticinios", "outros")
+You are a grocery list parser. Reply ONLY with a JSON array — no explanation, no markdown.
 
-If the user does not specify a quantity, default to "1" and "unidade".
-Do NOT return anything except the JSON array. Do not use markdown blocks, just the raw JSON.
-Example user input: "Vou querer 1 leite e carne"
-Output: [{"nome": "Leite", "quantidadePadrao": "1", "unidade": "unidade", "categoria": "laticinios"}, {"nome": "Carne", "quantidadePadrao": "1", "unidade": "unidade", "categoria": "carnes"}]
+Each object: {"nome": "Item", "quantidadePadrao": "1", "unidade": "unidade", "categoria": "outros"}
+
+Rules:
+- nome: capitalize first letter, in Portuguese
+- quantidadePadrao: string with digits only ("1", "2", "500")
+- unidade: one of "unidade", "kg", "g", "l", "ml"
+- categoria: MUST be exactly one of: "legumes", "frutas", "carnes", "laticinios", "outros"
+- Default quantity: "1", default unidade: "unidade"
+- Dairy items (leite, queijo, iogurte, manteiga) → "laticinios"
+- Meat items (carne, frango, peixe, linguica) → "carnes"
+- Vegetables/greens (alface, tomate, cebola, batata) → "legumes"
+- Fruits (banana, maca, laranja, uva) → "frutas"
+- Everything else → "outros"
+
+Input: "1 leite e carne"
+Output: [{"nome":"Leite","quantidadePadrao":"1","unidade":"unidade","categoria":"laticinios"},{"nome":"Carne","quantidadePadrao":"1","unidade":"unidade","categoria":"carnes"}]
 `.trim()
 
 export function buildAiPayload(provider, text, apiKey, customUrl) {
@@ -37,7 +43,7 @@ export function buildAiPayload(provider, text, apiKey, customUrl) {
 
   if (provider === 'groq') {
     url = 'https://api.groq.com/openai/v1/chat/completions'
-    model = 'llama3-8b-8192'
+    model = 'llama-3.1-8b-instant'
   } else if (provider === 'openrouter') {
     url = 'https://openrouter.ai/api/v1/chat/completions'
     model = 'deepseek/deepseek-chat:free'
@@ -82,9 +88,10 @@ export async function parseGroceryText(text, provider, apiKey, customUrl) {
       respText = data.choices[0].message.content
     }
     
-    // Strip potential markdown JSON formatting blocks
-    respText = respText.replace(/```json/g, '').replace(/```/g, '').trim()
-    return JSON.parse(respText)
+    // Extract first JSON array from response (handles markdown blocks and extra text)
+    const match = respText.match(/\[[\s\S]*?\](?=\s*(?:```|$|\n\n))/);
+    if (!match) throw new Error('No JSON array found in response')
+    return JSON.parse(match[0])
   } catch (err) {
     console.error('Failed to parse AI response', err, data)
     throw new Error('AI returned invalid format')
