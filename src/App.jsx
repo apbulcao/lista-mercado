@@ -17,6 +17,7 @@ import Historico from './components/Historico'
 import ConfigToken, { getToken, getRepo } from './components/ConfigToken'
 import WelcomeHeader from './components/WelcomeHeader'
 import SmartInput from './components/SmartInput'
+import FeedbackModal from './components/FeedbackModal'
 
 export default function App() {
   const [dados, setDados] = useState(null)
@@ -331,9 +332,10 @@ export default function App() {
 
       {/* Footer actions - only on lista view */}
       {view === 'lista' && (
-        <BarraAcoes onCopiar={handleCopiar} onConfirmar={handleConfirmar} />
+         <BarraAcoes onCopiar={handleCopiar} onConfirmar={handleConfirmar} />
       )}
 
+      <FeedbackModal />
       <ConfigToken aberto={configAberto} onFechar={() => setConfigAberto(false)} />
     </div>
   )
