@@ -117,49 +117,63 @@ export default function App() {
     ])
   }
 
-  function handleAddItemsFromAi(items) {
-    const novosItensLista = []
-    const novosItensCatalogo = []
+  function handleSmartInputItems(items) {
+    const itensParaAdicionar = items.filter(i => i.acao !== 'remove')
+    const itensParaRemover = items.filter(i => i.acao === 'remove')
 
-    items.forEach((item) => {
-      const slugBase = slugifyNomeItem(item.nome)
-      if (!slugBase) return
-
-      const itemExistente = dados.catalogo.find(
-        (c) => c.id === slugBase || slugifyNomeItem(c.nome) === slugBase
+    // Remove items
+    if (itensParaRemover.length > 0) {
+      const slugsRemover = itensParaRemover.map(i => slugifyNomeItem(i.nome))
+      setListaAtual((prev) =>
+        prev.filter((l) => !slugsRemover.includes(slugifyNomeItem(l.nome)))
       )
-
-      if (itemExistente) {
-        if (!listaAtual.some((l) => l.id === itemExistente.id)) {
-          novosItensLista.push({
-            ...itemExistente,
-            quantidade: item.quantidadePadrao || itemExistente.quantidadePadrao,
-            checked: true,
-          })
-        }
-      } else {
-        const id = criarIdItem(item.nome, [...dados.catalogo, ...novosItensCatalogo])
-        const categoriasValidas = CATEGORIAS.map(c => c.id)
-        const novoItem = {
-          id,
-          nome: item.nome,
-          categoria: categoriasValidas.includes(item.categoria) ? item.categoria : 'outros',
-          quantidadePadrao: item.quantidadePadrao || '1',
-          unidade: item.unidade || '',
-          detalhes: '',
-          marca: '',
-          score: 0,
-        }
-        novosItensCatalogo.push(novoItem)
-        novosItensLista.push({ ...novoItem, quantidade: novoItem.quantidadePadrao, checked: true })
-      }
-    })
-
-    if (novosItensCatalogo.length > 0) {
-      setDados((prev) => ({ ...prev, catalogo: [...prev.catalogo, ...novosItensCatalogo] }))
     }
-    if (novosItensLista.length > 0) {
-      setListaAtual((prev) => [...prev, ...novosItensLista])
+
+    // Add items
+    if (itensParaAdicionar.length > 0) {
+      const novosItensLista = []
+      const novosItensCatalogo = []
+
+      itensParaAdicionar.forEach((item) => {
+        const slugBase = slugifyNomeItem(item.nome)
+        if (!slugBase) return
+
+        const itemExistente = dados.catalogo.find(
+          (c) => c.id === slugBase || slugifyNomeItem(c.nome) === slugBase
+        )
+
+        if (itemExistente) {
+          if (!listaAtual.some((l) => l.id === itemExistente.id)) {
+            novosItensLista.push({
+              ...itemExistente,
+              quantidade: item.quantidadePadrao || itemExistente.quantidadePadrao,
+              checked: true,
+            })
+          }
+        } else {
+          const id = criarIdItem(item.nome, [...dados.catalogo, ...novosItensCatalogo])
+          const categoriasValidas = CATEGORIAS.map(c => c.id)
+          const novoItem = {
+            id,
+            nome: item.nome,
+            categoria: categoriasValidas.includes(item.categoria) ? item.categoria : 'outros',
+            quantidadePadrao: item.quantidadePadrao || '1',
+            unidade: item.unidade || '',
+            detalhes: '',
+            marca: '',
+            score: 0,
+          }
+          novosItensCatalogo.push(novoItem)
+          novosItensLista.push({ ...novoItem, quantidade: novoItem.quantidadePadrao, checked: true })
+        }
+      })
+
+      if (novosItensCatalogo.length > 0) {
+        setDados((prev) => ({ ...prev, catalogo: [...prev.catalogo, ...novosItensCatalogo] }))
+      }
+      if (novosItensLista.length > 0) {
+        setListaAtual((prev) => [...prev, ...novosItensLista])
+      }
     }
   }
 
@@ -303,7 +317,7 @@ export default function App() {
         {view === 'lista' ? (
           <>
             <WelcomeHeader />
-            <SmartInput onAddItems={handleAddItemsFromAi} />
+            <SmartInput onAddItems={handleSmartInputItems} />
             {CATEGORIAS.map((cat) => {
               const catItens = listaAtual.filter((i) => i.categoria === cat.id)
               const catalogoExtras = dados.catalogo.filter(

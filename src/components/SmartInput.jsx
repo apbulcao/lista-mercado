@@ -52,7 +52,7 @@ export default function SmartInput({ onAddItems }) {
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Ex: 2 leites, pão e 500g de carne..."
+          placeholder="Ex: 2 leites, pão... ou: tira o leite"
           className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 focus:border-[#2D6A4F] text-sm"
           disabled={loading}
         />

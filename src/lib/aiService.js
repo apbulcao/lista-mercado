@@ -1,14 +1,16 @@
 const SYSTEM_PROMPT = `
 You are a grocery list parser. Reply ONLY with a JSON array — no explanation, no markdown.
 
-Each object: {"nome": "Item", "quantidadePadrao": "1", "unidade": "unidade", "categoria": "outros"}
+Each object: {"nome": "Item", "quantidadePadrao": "1", "unidade": "unidade", "categoria": "outros", "acao": "add"}
 
 Rules:
 - nome: capitalize first letter, in Portuguese
 - quantidadePadrao: string with digits only ("1", "2", "500")
 - unidade: one of "unidade", "kg", "g", "l", "ml"
 - categoria: MUST be exactly one of: "legumes", "frutas", "carnes", "laticinios", "outros"
-- Default quantity: "1", default unidade: "unidade"
+- acao: "add" to add items, "remove" to remove items
+- Default quantity: "1", default unidade: "unidade", default acao: "add"
+- Detect removal intent from words like: "tira", "remove", "sem", "não quero", "retira", "cancela"
 - Dairy items (leite, queijo, iogurte, manteiga) → "laticinios"
 - Meat items (carne, frango, peixe, linguica) → "carnes"
 - Vegetables/greens (alface, tomate, cebola, batata) → "legumes"
@@ -16,7 +18,10 @@ Rules:
 - Everything else → "outros"
 
 Input: "1 leite e carne"
-Output: [{"nome":"Leite","quantidadePadrao":"1","unidade":"unidade","categoria":"laticinios"},{"nome":"Carne","quantidadePadrao":"1","unidade":"unidade","categoria":"carnes"}]
+Output: [{"nome":"Leite","quantidadePadrao":"1","unidade":"unidade","categoria":"laticinios","acao":"add"},{"nome":"Carne","quantidadePadrao":"1","unidade":"unidade","categoria":"carnes","acao":"add"}]
+
+Input: "tira o leite e remove a cebola"
+Output: [{"nome":"Leite","quantidadePadrao":"1","unidade":"unidade","categoria":"laticinios","acao":"remove"},{"nome":"Cebola","quantidadePadrao":"1","unidade":"unidade","categoria":"legumes","acao":"remove"}]
 `.trim()
 
 export function buildAiPayload(provider, text, apiKey, customUrl) {
