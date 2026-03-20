@@ -16,6 +16,7 @@ import AdicionarItemNovo from './components/AdicionarItemNovo'
 import Historico from './components/Historico'
 import ConfigToken, { getToken, getRepo } from './components/ConfigToken'
 import WelcomeHeader from './components/WelcomeHeader'
+import SmartInput from './components/SmartInput'
 
 export default function App() {
   const [dados, setDados] = useState(null)
@@ -113,6 +114,51 @@ export default function App() {
       ...prev,
       { ...novoItem, quantidade: '1', checked: true },
     ])
+  }
+
+  function handleAddItemsFromAi(items) {
+    const novosItensLista = []
+    const novosItensCatalogo = []
+
+    items.forEach((item) => {
+      const slugBase = slugifyNomeItem(item.nome)
+      if (!slugBase) return
+
+      const itemExistente = dados.catalogo.find(
+        (c) => c.id === slugBase || slugifyNomeItem(c.nome) === slugBase
+      )
+
+      if (itemExistente) {
+        if (!listaAtual.some((l) => l.id === itemExistente.id)) {
+          novosItensLista.push({
+            ...itemExistente,
+            quantidade: item.quantidadePadrao || itemExistente.quantidadePadrao,
+            checked: true,
+          })
+        }
+      } else {
+        const id = criarIdItem(item.nome, [...dados.catalogo, ...novosItensCatalogo])
+        const novoItem = {
+          id,
+          nome: item.nome,
+          categoria: 'outros',
+          quantidadePadrao: item.quantidadePadrao || '1',
+          unidade: item.unidade || '',
+          detalhes: '',
+          marca: '',
+          score: 0,
+        }
+        novosItensCatalogo.push(novoItem)
+        novosItensLista.push({ ...novoItem, quantidade: novoItem.quantidadePadrao, checked: true })
+      }
+    })
+
+    if (novosItensCatalogo.length > 0) {
+      setDados((prev) => ({ ...prev, catalogo: [...prev.catalogo, ...novosItensCatalogo] }))
+    }
+    if (novosItensLista.length > 0) {
+      setListaAtual((prev) => [...prev, ...novosItensLista])
+    }
   }
 
   function getItensSelecionadosValidos() {
@@ -255,6 +301,7 @@ export default function App() {
         {view === 'lista' ? (
           <>
             <WelcomeHeader />
+            <SmartInput onAddItems={handleAddItemsFromAi} />
             {CATEGORIAS.map((cat) => {
               const catItens = listaAtual.filter((i) => i.categoria === cat.id)
               const catalogoExtras = dados.catalogo.filter(
