@@ -37,7 +37,7 @@ export default function CategoriaCard({
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-2 px-4 pt-4 pb-2">
         <span className="text-lg">{categoria.emoji}</span>

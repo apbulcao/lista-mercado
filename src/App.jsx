@@ -15,6 +15,7 @@ import BarraAcoes from './components/BarraAcoes'
 import AdicionarItemNovo from './components/AdicionarItemNovo'
 import Historico from './components/Historico'
 import ConfigToken, { getToken, getRepo } from './components/ConfigToken'
+import WelcomeHeader from './components/WelcomeHeader'
 
 export default function App() {
   const [dados, setDados] = useState(null)
@@ -253,6 +254,7 @@ export default function App() {
       <main className="max-w-lg mx-auto px-4 py-4 pb-28 space-y-4">
         {view === 'lista' ? (
           <>
+            <WelcomeHeader />
             {CATEGORIAS.map((cat) => {
               const catItens = listaAtual.filter((i) => i.categoria === cat.id)
               const catalogoExtras = dados.catalogo.filter(

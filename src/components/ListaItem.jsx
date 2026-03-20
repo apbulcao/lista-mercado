@@ -14,7 +14,7 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
 
   return (
     <div
-      className={`flex items-center gap-3 p-3 rounded-lg transition-opacity duration-200 ${
+      className={`flex items-center gap-3 p-3 rounded-xl transition-opacity duration-200 ${
         checked ? '' : 'opacity-50'
       }`}
     >

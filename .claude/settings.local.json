@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pandoc:*)",
+      "Bash(cd \"C:/Users/apbul/onedrive/claude/programas/lista-mercado\" && npm install react react-dom 2>&1)",
+      "Bash(cd:*)"
+    ]
+  }
+}

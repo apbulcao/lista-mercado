@@ -1,3 +1,5 @@
+import { normalizarQuantidade } from './itemUtils'
+
 const DECAY = 0.9
 
 function modaQuantidade(quantidades) {
@@ -25,7 +27,8 @@ export function recalcularScores(catalogo, historico) {
       const entry = lista.itens.find(it => it.catalogoId === item.id)
       if (entry) {
         score += pesos[i]
-        quantidades.push(entry.quantidade)
+        const limpa = normalizarQuantidade(entry.quantidade)
+        if (limpa) quantidades.push(limpa)
       }
     })
     const quantidadePadrao = modaQuantidade(quantidades) || item.quantidadePadrao
