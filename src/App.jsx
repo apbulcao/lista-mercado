@@ -259,17 +259,17 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3" style={{ backgroundColor: '#FAFAF8' }}>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3" style={{ backgroundColor: '#F2EDE4' }}>
         <div className="w-8 h-8 border-3 border-gray-200 border-t-[#2D6A4F] rounded-full animate-spin" />
-        <span className="text-sm text-gray-400">Carregando...</span>
+        <span className="text-sm" style={{ color: '#7A7267' }}>Carregando...</span>
       </div>
     )
   }
 
   if (erroCarregamento) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#FAFAF8' }}>
-        <div className="max-w-sm w-full bg-white rounded-xl shadow-sm p-5 space-y-4 text-center">
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#F2EDE4' }}>
+        <div className="max-w-sm w-full rounded-2xl shadow-sm p-5 space-y-4 text-center" style={{ backgroundColor: '#FDFAF7', border: '1px solid #E5DDD0' }}>
           <div className="space-y-2">
             <h1 className="text-lg font-bold" style={{ color: '#1A1A1A' }}>
               Lista Mercado
@@ -292,23 +292,29 @@ export default function App() {
   const diaFormatado = `${String(hoje.getDate()).padStart(2, '0')}/${String(hoje.getMonth() + 1).padStart(2, '0')}`
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#FAFAF8' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#F2EDE4' }}>
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white shadow-sm px-4 py-3 flex items-center justify-between max-w-lg mx-auto">
-        <h1 className="text-lg font-bold" style={{ color: '#1A1A1A' }}>
+      <header className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between max-w-lg mx-auto" style={{ backgroundColor: 'rgba(253,250,247,0.95)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderBottom: '1px solid #E5DDD0' }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.2rem', fontWeight: 600, color: '#2D6A4F', letterSpacing: '-0.01em' }}>
           Lista Mercado
         </h1>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500">{diaFormatado}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm" style={{ color: '#9A9186' }}>{diaFormatado}</span>
           <button
             onClick={() => setView(view === 'lista' ? 'historico' : 'lista')}
-            className="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors duration-200 active:bg-gray-100"
+            className="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors duration-200"
+            style={{ border: '1px solid #E5DDD0', color: '#5A5449', backgroundColor: 'transparent' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F2EDE4'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
-            {view === 'lista' ? 'Historico' : 'Voltar'}
+            {view === 'lista' ? 'Histórico' : 'Voltar'}
           </button>
           <button
             onClick={() => setConfigAberto(true)}
-            className="text-sm px-2 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors duration-200 active:bg-gray-100"
+            className="text-sm px-2 py-1.5 rounded-lg transition-colors duration-200"
+            style={{ border: '1px solid #E5DDD0', color: '#5A5449', backgroundColor: 'transparent' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F2EDE4'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             ⚙️
           </button>

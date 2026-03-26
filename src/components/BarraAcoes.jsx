@@ -10,19 +10,39 @@ export default function BarraAcoes({ onCopiar, onConfirmar }) {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-      <div className="max-w-lg mx-auto px-4 py-3 pb-4 flex gap-3">
+    <div
+      className="fixed bottom-0 left-0 right-0"
+      style={{
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        background: 'rgba(242, 237, 228, 0.92)',
+        backdropFilter: 'blur(14px)',
+        WebkitBackdropFilter: 'blur(14px)',
+        borderTop: '1px solid rgba(229, 221, 208, 0.8)',
+      }}
+    >
+      <div className="max-w-lg mx-auto px-4 py-3 pb-4 flex gap-2.5">
         <button
           onClick={handleCopiar}
-          className="flex-1 py-3 rounded-xl font-semibold text-white transition-colors duration-200 active:scale-[0.98]"
-          style={{ backgroundColor: copiado ? '#22c55e' : '#2D6A4F' }}
+          className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200 active:scale-[0.98]"
+          style={{
+            backgroundColor: copiado ? '#52B788' : '#2D6A4F',
+            color: '#fff',
+            letterSpacing: '0.01em',
+          }}
         >
-          {copiado ? '\u2713 Copiado!' : '\uD83D\uDCCB Copiar para WhatsApp'}
+          {copiado ? '✓ Copiado!' : '📋 Copiar para WhatsApp'}
         </button>
         <button
           onClick={onConfirmar}
-          className="px-6 py-3 rounded-xl font-semibold border-2 transition-colors duration-200 hover:bg-[#2D6A4F]/5 active:scale-[0.98]"
-          style={{ borderColor: '#2D6A4F', color: '#2D6A4F' }}
+          className="px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 active:scale-[0.98]"
+          style={{
+            border: '1.5px solid #2D6A4F',
+            color: '#2D6A4F',
+            backgroundColor: 'transparent',
+            letterSpacing: '0.01em',
+          }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(45,106,79,0.06)'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           Confirmar
         </button>

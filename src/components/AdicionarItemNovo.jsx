@@ -18,36 +18,36 @@ export default function AdicionarItemNovo({ onAdicionar }) {
 
   if (!aberto) {
     return (
-      <div className="mt-4 text-center">
+      <div className="mt-2 text-center">
         <button
           type="button"
           onClick={() => setAberto(true)}
-          className="text-sm font-medium hover:underline cursor-pointer py-3 transition-colors duration-200"
-          style={{ color: '#2D6A4F' }}
+          className="text-xs font-medium cursor-pointer py-3 transition-colors duration-200"
+          style={{ color: '#9A8F83' }}
         >
-          + Adicionar item novo
+          + item não listado acima
         </button>
       </div>
     )
   }
 
   return (
-    <div className="mt-4 bg-white rounded-xl shadow-sm p-4">
+    <div className="mt-2 rounded-2xl p-4" style={{ backgroundColor: '#FDFAF7', border: '1px solid #E5DDD0' }}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input
           type="text"
           placeholder="Nome do item"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
-          className="border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 focus:border-[#2D6A4F] transition-colors duration-200"
-          style={{ color: '#1A1A1A' }}
+          className="rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors duration-200"
+          style={{ color: '#1C1A16', border: '1px solid #E5DDD0', backgroundColor: '#F2EDE4' }}
           autoFocus
         />
         <select
           value={categoria}
           onChange={(e) => setCategoria(e.target.value)}
-          className="border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 focus:border-[#2D6A4F] transition-colors duration-200"
-          style={{ color: '#1A1A1A' }}
+          className="rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors duration-200"
+          style={{ color: '#1C1A16', border: '1px solid #E5DDD0', backgroundColor: '#F2EDE4' }}
         >
           {CATEGORIAS.map((cat) => (
             <option key={cat.id} value={cat.id}>
@@ -58,7 +58,7 @@ export default function AdicionarItemNovo({ onAdicionar }) {
         <div className="flex gap-2">
           <button
             type="submit"
-            className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white transition-colors duration-200 hover:opacity-90 active:scale-[0.98]"
+            className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
             style={{ backgroundColor: '#2D6A4F' }}
           >
             Adicionar
@@ -70,7 +70,8 @@ export default function AdicionarItemNovo({ onAdicionar }) {
               setNome('')
               setCategoria('outros')
             }}
-            className="px-4 py-2.5 rounded-lg text-sm font-semibold text-gray-500 border border-gray-200 transition-colors duration-200 hover:bg-gray-50"
+            className="px-4 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
+            style={{ color: '#7A7267', border: '1px solid #E5DDD0', backgroundColor: 'transparent' }}
           >
             Cancelar
           </button>

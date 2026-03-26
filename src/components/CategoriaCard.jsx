@@ -1,6 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
 import ListaItem from './ListaItem'
 
+const CATEGORIA_CORES = {
+  legumes: '#52B788',
+  frutas: '#F4895F',
+  carnes: '#C96442',
+  laticinios: '#C9A84C',
+  outros: '#9AA5B4',
+}
+
 export default function CategoriaCard({
   categoria,
   itens,
@@ -12,6 +20,7 @@ export default function CategoriaCard({
   const [dropdownAberto, setDropdownAberto] = useState(false)
   const [filtro, setFiltro] = useState('')
   const dropdownRef = useRef(null)
+  const cor = CATEGORIA_CORES[categoria.id] || '#9AA5B4'
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -37,17 +46,33 @@ export default function CategoriaCard({
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+    <div
+      className="rounded-2xl overflow-hidden relative"
+      style={{
+        backgroundColor: '#FDFAF7',
+        border: '1px solid #E5DDD0',
+        boxShadow: '0 1px 4px rgba(44,40,34,0.06)',
+      }}
+    >
+      {/* Barra colorida lateral */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-[3px]"
+        style={{ backgroundColor: cor, borderRadius: '4px 0 0 4px' }}
+      />
+
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 pt-4 pb-2">
-        <span className="text-lg">{categoria.emoji}</span>
-        <span className="text-sm font-semibold tracking-wider text-[#2D6A4F]">
+      <div className="flex items-center gap-2.5 px-4 pt-4 pb-2 pl-5">
+        <span className="text-base">{categoria.emoji}</span>
+        <span
+          className="text-xs font-semibold"
+          style={{ color: cor, letterSpacing: '0.08em' }}
+        >
           {categoria.nome.toUpperCase()}
         </span>
       </div>
 
       {/* Items */}
-      <div className="px-2 pb-1">
+      <div className="px-2 pb-1 pl-3">
         {itens.map((item) => (
           <ListaItem
             key={item.id}
@@ -60,31 +85,38 @@ export default function CategoriaCard({
 
       {/* Adicionar */}
       {catalogoExtras.length > 0 && (
-        <div className="relative px-4 pb-4" ref={dropdownRef}>
+        <div className="relative px-4 pb-4 pl-5" ref={dropdownRef}>
           <button
             type="button"
             onClick={() => setDropdownAberto(!dropdownAberto)}
-            className="text-sm text-[#2D6A4F] font-medium hover:underline cursor-pointer py-1 transition-colors duration-200"
+            className="text-xs font-medium transition-colors duration-200"
+            style={{ color: cor, opacity: 0.8 }}
           >
             + Adicionar
           </button>
 
           {dropdownAberto && (
-            <div className="absolute left-4 right-4 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-60 overflow-auto">
-              {catalogoExtras.length > 3 && (
-                <div className="p-2 border-b border-gray-100">
-                  <input
-                    type="text"
-                    placeholder="Buscar..."
-                    value={filtro}
-                    onChange={(e) => setFiltro(e.target.value)}
-                    className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 focus:border-[#2D6A4F] transition-colors duration-200"
-                    autoFocus
-                  />
-                </div>
-              )}
+            <div
+              className="absolute left-4 right-4 mt-1 rounded-xl z-10 max-h-80 overflow-auto"
+              style={{
+                backgroundColor: '#FDFAF7',
+                border: '1px solid #E5DDD0',
+                boxShadow: '0 8px 24px rgba(44,40,34,0.12)',
+              }}
+            >
+              <div className="p-2 sticky top-0" style={{ backgroundColor: '#FDFAF7', borderBottom: '1px solid #F0E8DB' }}>
+                <input
+                  type="text"
+                  placeholder="Buscar..."
+                  value={filtro}
+                  onChange={(e) => setFiltro(e.target.value)}
+                  className="w-full text-sm rounded-lg px-2.5 py-1.5 focus:outline-none transition-colors duration-200"
+                  style={{ border: '1px solid #E5DDD0', backgroundColor: '#F7F2EB', color: '#1C1A16' }}
+                  autoFocus
+                />
+              </div>
               {extrasFiltrados.length === 0 ? (
-                <div className="px-3 py-2 text-sm text-gray-400">
+                <div className="px-3 py-2 text-sm" style={{ color: '#9A8F83' }}>
                   Nenhum item encontrado
                 </div>
               ) : (
@@ -93,12 +125,15 @@ export default function CategoriaCard({
                     key={extra.id}
                     type="button"
                     onClick={() => handleAdicionarClick(extra.id)}
-                    className="w-full text-left px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+                    className="w-full text-left px-3 py-2 text-sm flex items-center justify-between transition-colors duration-150 cursor-pointer"
+                    style={{ color: '#1C1A16' }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = `${cor}10`}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
-                    {extra.nome}
-                    {extra.quantidadePadrao && (
-                      <span className="text-xs text-gray-400 ml-1">
-                        ({extra.quantidadePadrao})
+                    <span>{extra.nome}</span>
+                    {extra.quantidadePadrao && extra.quantidadePadrao !== '1' && (
+                      <span className="text-xs ml-2 shrink-0" style={{ color: '#9A8F83' }}>
+                        {extra.quantidadePadrao}
                       </span>
                     )}
                   </button>

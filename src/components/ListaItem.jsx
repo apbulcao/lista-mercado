@@ -14,27 +14,25 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
 
   return (
     <div
-      className={`flex items-center gap-3 p-3 rounded-xl transition-opacity duration-200 ${
-        checked ? '' : 'opacity-50'
-      }`}
+      className={`flex items-center gap-3 px-2 py-2 rounded-xl transition-opacity duration-200 ${checked ? '' : 'opacity-50'}`}
     >
       {/* Checkbox */}
-      <label className="relative flex items-center cursor-pointer min-w-[44px] min-h-[44px] justify-center">
+      <label className="relative flex items-center cursor-pointer shrink-0" style={{ minWidth: 40, minHeight: 40, justifyContent: 'center' }}>
         <input
           type="checkbox"
           checked={checked}
           onChange={() => onToggle(id)}
-          className="sr-only peer"
+          className="sr-only"
         />
         <span
-          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors duration-200 ${
-            checked
-              ? 'bg-[#2D6A4F] border-[#2D6A4F]'
-              : 'border-gray-400 bg-white'
-          }`}
+          className="w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200"
+          style={{
+            backgroundColor: checked ? '#2D6A4F' : 'transparent',
+            border: checked ? '2px solid #2D6A4F' : '2px solid #C5BAB0',
+          }}
         >
           {checked && (
-            <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 20 20" fill="currentColor">
+            <svg className="w-3 h-3 text-white" viewBox="0 0 20 20" fill="currentColor">
               <path
                 fillRule="evenodd"
                 d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -45,43 +43,72 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
         </span>
       </label>
 
-      {/* Quantity control */}
-      <div className="flex items-center gap-1">
+      {/* Quantity pill */}
+      <div
+        className="flex items-center shrink-0 rounded-lg overflow-hidden"
+        style={{ border: '1px solid #E5DDD0', backgroundColor: '#F7F2EB' }}
+      >
         <button
           type="button"
           onClick={() => handleQuantidadeChange(-1)}
-          className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 text-sm font-bold leading-none transition-colors duration-200 hover:bg-gray-200 active:bg-gray-300"
+          className="flex items-center justify-center transition-colors duration-150"
+          style={{ width: 26, height: 26, color: '#7A7267' }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EDE6DA'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           aria-label="diminuir quantidade"
         >
-          -
+          <svg width="8" height="2" viewBox="0 0 8 2" fill="currentColor">
+            <rect width="8" height="2" rx="1"/>
+          </svg>
         </button>
         <input
           type="text"
           value={quantidade}
           onChange={handleInputChange}
-          className="w-[3ch] text-center text-sm font-medium border border-gray-300 rounded px-0.5"
+          className="text-center text-sm font-medium focus:outline-none"
+          style={{
+            width: '2.2rem',
+            color: '#1C1A16',
+            backgroundColor: 'transparent',
+            borderLeft: '1px solid #E5DDD0',
+            borderRight: '1px solid #E5DDD0',
+            height: 26,
+          }}
         />
         <button
           type="button"
           onClick={() => handleQuantidadeChange(1)}
-          className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 text-sm font-bold leading-none transition-colors duration-200 hover:bg-gray-200 active:bg-gray-300"
+          className="flex items-center justify-center transition-colors duration-150"
+          style={{ width: 26, height: 26, color: '#7A7267' }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EDE6DA'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           aria-label="aumentar quantidade"
         >
-          +
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor">
+            <rect x="3" width="2" height="8" rx="1"/>
+            <rect y="3" width="8" height="2" rx="1"/>
+          </svg>
         </button>
-        {unidade && (
-          <span className="text-xs text-gray-500 ml-0.5">{unidade}</span>
-        )}
       </div>
 
       {/* Name + details */}
-      <div className="flex flex-col min-w-0">
-        <span className={`font-semibold text-sm ${checked ? '' : 'line-through'}`} style={{ color: '#1A1A1A' }}>
+      <div className="flex flex-col min-w-0 flex-1">
+        <span
+          className="text-sm font-medium"
+          style={{
+            color: '#1C1A16',
+            textDecoration: checked ? 'none' : 'line-through',
+            textDecorationColor: '#C5BAB0',
+          }}
+        >
           {nome}
+          {unidade && (
+            <span className="font-normal ml-1" style={{ color: '#9A8F83', fontSize: '0.72rem' }}>{unidade}</span>
+          )}
         </span>
         {(detalhes || marca) && (
-          <span className="text-xs text-[#6B7280] truncate">
-            {[detalhes, marca].filter(Boolean).join(' \u00b7 ')}
+          <span className="truncate" style={{ fontSize: '0.72rem', color: '#9A8F83' }}>
+            {[detalhes, marca].filter(Boolean).join(' · ')}
           </span>
         )}
       </div>

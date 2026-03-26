@@ -35,8 +35,8 @@ export default function ConfigToken({ aberto, onFechar }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-5 my-8">
-        <h3 className="font-semibold text-lg mb-4" style={{ color: '#1A1A1A' }}>Configurações</h3>
+      <div className="rounded-2xl shadow-xl max-w-sm w-full p-5 my-8" style={{ backgroundColor: '#FDFAF7', border: '1px solid #E5DDD0' }}>
+        <h3 className="font-semibold mb-4" style={{ color: '#1C1A16', fontFamily: "'Playfair Display', serif", fontSize: '1.1rem', fontStyle: 'italic' }}>Configurações</h3>
 
         <div className="space-y-4">
           <div className="pb-3 border-b border-gray-100">
@@ -44,11 +44,11 @@ export default function ConfigToken({ aberto, onFechar }) {
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Repositório GitHub</label>
-                <input type="text" value={repo} onChange={e => setRepo(e.target.value)} placeholder="usuario/lista-mercado" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 focus:border-[#2D6A4F]" />
+                <input type="text" value={repo} onChange={e => setRepo(e.target.value)} placeholder="usuario/lista-mercado" className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none transition-colors duration-200" style={{ border: '1px solid #E5DDD0', backgroundColor: '#F2EDE4', color: '#1C1A16' }} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Token GitHub</label>
-                <input type="password" value={token} onChange={e => setToken(e.target.value)} placeholder="ghp_..." className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 focus:border-[#2D6A4F]" />
+                <input type="password" value={token} onChange={e => setToken(e.target.value)} placeholder="ghp_..." className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none transition-colors duration-200" style={{ border: '1px solid #E5DDD0', backgroundColor: '#F2EDE4', color: '#1C1A16' }} />
               </div>
             </div>
           </div>
@@ -58,7 +58,7 @@ export default function ConfigToken({ aberto, onFechar }) {
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Provedor de IA</label>
-                <select value={aiProvider} onChange={e => setAiProvider(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 focus:border-[#2D6A4F]">
+                <select value={aiProvider} onChange={e => setAiProvider(e.target.value)} className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none transition-colors duration-200" style={{ border: '1px solid #E5DDD0', backgroundColor: '#F2EDE4', color: '#1C1A16' }}>
                   <option value="gemini">Google Gemini (Grátis)</option>
                   <option value="groq">Groq / Llama 3 (Grátis)</option>
                   <option value="openrouter">OpenRouter (Múltiplos)</option>
@@ -68,12 +68,12 @@ export default function ConfigToken({ aberto, onFechar }) {
               {aiProvider === 'custom' && (
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">URL da API</label>
-                  <input type="text" value={aiUrl} onChange={e => setAiUrl(e.target.value)} placeholder="https://api.openai.com/v1" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 focus:border-[#2D6A4F]" />
+                  <input type="text" value={aiUrl} onChange={e => setAiUrl(e.target.value)} placeholder="https://api.openai.com/v1" className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none transition-colors duration-200" style={{ border: '1px solid #E5DDD0', backgroundColor: '#F2EDE4', color: '#1C1A16' }} />
                 </div>
               )}
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">API Key da IA</label>
-                <input type="password" value={aiKey} onChange={e => setAiKey(e.target.value)} placeholder="Sua chave de API" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 focus:border-[#2D6A4F]" />
+                <input type="password" value={aiKey} onChange={e => setAiKey(e.target.value)} placeholder="Sua chave de API" className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none transition-colors duration-200" style={{ border: '1px solid #E5DDD0', backgroundColor: '#F2EDE4', color: '#1C1A16' }} />
               </div>
             </div>
           </div>

@@ -30,19 +30,22 @@ export default function WelcomeHeader() {
     saudacao = 'Boa noite'
   }
 
-  // Muda a frase a cada dia do ano
   const hoje = new Date()
   const diaDoAno = Math.floor((hoje - new Date(hoje.getFullYear(), 0, 0)) / 86400000)
   const frase = SABEDORIAS[diaDoAno % SABEDORIAS.length]
 
   return (
-    <div className="px-4 py-3 mb-4 bg-white shadow-sm rounded-2xl border border-gray-100 flex items-center justify-between">
-      <div>
-        <h2 className="text-xl font-bold" style={{ color: '#2D6A4F' }}>
-          {saudacao}! 🍀
-        </h2>
-        <p className="text-sm text-gray-500 italic">{frase}</p>
-      </div>
+    <div
+      className="px-4 py-4 mb-1 rounded-2xl overflow-hidden"
+      style={{
+        background: 'linear-gradient(135deg, rgba(45,106,79,0.07) 0%, rgba(82,183,136,0.04) 100%)',
+        border: '1px solid #E5DDD0',
+      }}
+    >
+      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.35rem', fontStyle: 'italic', fontWeight: 600, color: '#2D6A4F', lineHeight: 1.2, marginBottom: '0.35rem' }}>
+        {saudacao}! 🍀
+      </h2>
+      <p style={{ fontSize: '0.8rem', color: '#9A8F83', fontStyle: 'italic', lineHeight: 1.45 }}>{frase}</p>
     </div>
   )
 }

@@ -46,31 +46,44 @@ export default function SmartInput({ onAddItems }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-4 mb-4">
-      <form onSubmit={handleSubmit} className="flex gap-2 relative">
+    <div
+      className="rounded-2xl p-4 mb-2"
+      style={{
+        backgroundColor: '#FDFAF7',
+        border: '1px solid #E5DDD0',
+        boxShadow: '0 1px 4px rgba(44,40,34,0.06)',
+      }}
+    >
+      <form onSubmit={handleSubmit} className="flex gap-2">
         <input
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Ex: 2 leites, pão... ou: tira o leite"
-          className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]/30 focus:border-[#2D6A4F] text-sm"
+          className="flex-1 px-4 py-2.5 rounded-xl text-sm focus:outline-none transition-colors duration-200"
+          style={{
+            backgroundColor: '#F2EDE4',
+            border: '1px solid #E5DDD0',
+            color: '#1C1A16',
+          }}
           disabled={loading}
         />
         <button
           type="submit"
           disabled={loading || !text.trim()}
-          className="px-5 py-3 bg-[#2D6A4F] hover:bg-[#1B4332] text-white rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center justify-center min-w-[4rem]"
+          className="px-4 py-2.5 rounded-xl font-medium text-sm text-white transition-all duration-200 disabled:opacity-40 flex items-center justify-center"
+          style={{ backgroundColor: '#2D6A4F', minWidth: '3.5rem' }}
         >
           {loading ? (
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
-            <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
             </svg>
           )}
         </button>
       </form>
-      {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+      {error && <p className="text-xs mt-2" style={{ color: '#C96442' }}>{error}</p>}
     </div>
   )
 }
