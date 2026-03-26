@@ -18,7 +18,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.83
+      "score": 0.87
     },
     {
       "id": "iogurte-grego",
@@ -28,7 +28,7 @@
       "unidade": "",
       "detalhes": "tampa azul",
       "marca": "Yorgus",
-      "score": 0.83
+      "score": 0.91
     },
     {
       "id": "leite-integral",
@@ -38,7 +38,7 @@
       "unidade": "litros",
       "detalhes": "",
       "marca": "Parmalat",
-      "score": 0.83
+      "score": 0.87
     },
     {
       "id": "milho-sweet",
@@ -48,7 +48,7 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "",
-      "score": 0.83
+      "score": 0.87
     },
     {
       "id": "morango",
@@ -58,7 +58,7 @@
       "unidade": "pacotes",
       "detalhes": "",
       "marca": "Altea",
-      "score": 0.83
+      "score": 0.87
     },
     {
       "id": "alho",
@@ -68,7 +68,7 @@
       "unidade": "cabeça",
       "detalhes": "",
       "marca": "",
-      "score": 0.67
+      "score": 0.76
     },
     {
       "id": "file-peito-frango",
@@ -78,7 +78,7 @@
       "unidade": "kg",
       "detalhes": "",
       "marca": "Korin",
-      "score": 0.67
+      "score": 0.78
     },
     {
       "id": "limoes-tahity",
@@ -88,7 +88,7 @@
       "unidade": "",
       "detalhes": "escolher com casca mais lisa",
       "marca": "",
-      "score": 0.67
+      "score": 0.76
     },
     {
       "id": "maca",
@@ -98,7 +98,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.67
+      "score": 0.77
     },
     {
       "id": "mamao-papaya",
@@ -108,7 +108,7 @@
       "unidade": "",
       "detalhes": "consumo em 2 dias",
       "marca": "",
-      "score": 0.67
+      "score": 0.78
     },
     {
       "id": "molho-de-tomate",
@@ -118,7 +118,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "NOR",
-      "score": 0.67
+      "score": 0.76
     },
     {
       "id": "mucarela",
@@ -128,17 +128,17 @@
       "unidade": "bandeja",
       "detalhes": "",
       "marca": "Hortisabor",
-      "score": 0.67
+      "score": 0.78
     },
     {
       "id": "ovos-vermelhos",
       "nome": "ovos vermelhos",
       "categoria": "outros",
-      "quantidadePadrao": "1",
+      "quantidadePadrao": "120",
       "unidade": "bandeja 20",
       "detalhes": "",
       "marca": "Nakamura",
-      "score": 0.67
+      "score": 0.78
     },
     {
       "id": "pao-de-forma",
@@ -148,7 +148,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "Panco/Pullmann",
-      "score": 0.67
+      "score": 0.78
     },
     {
       "id": "patinho-moido",
@@ -158,7 +158,7 @@
       "unidade": "kg",
       "detalhes": "dividir em 2 bandejas",
       "marca": "",
-      "score": 0.67
+      "score": 0.78
     },
     {
       "id": "alface-americana",
@@ -168,7 +168,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.5
+      "score": 0.69
     },
     {
       "id": "azeite",
@@ -178,7 +178,7 @@
       "unidade": "500ml",
       "detalhes": "",
       "marca": "Borges/Andorinha",
-      "score": 0.5
+      "score": 0.28
     },
     {
       "id": "batata-doce",
@@ -188,7 +188,7 @@
       "unidade": "bandejas",
       "detalhes": "",
       "marca": "",
-      "score": 0.5
+      "score": 0.3
     },
     {
       "id": "brocolis-ninja",
@@ -198,7 +198,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.5
+      "score": 0.28
     },
     {
       "id": "cenouras",
@@ -208,7 +208,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.5
+      "score": 0.68
     },
     {
       "id": "melao-amarelo",
@@ -218,7 +218,7 @@
       "unidade": "pedaço",
       "detalhes": "",
       "marca": "",
-      "score": 0.5
+      "score": 0.32
     },
     {
       "id": "pao-tartaruga-multigraos",
@@ -228,7 +228,7 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "",
-      "score": 0.5
+      "score": 0.32
     },
     {
       "id": "peito-de-peru",
@@ -238,7 +238,7 @@
       "unidade": "g",
       "detalhes": "fininho",
       "marca": "Sadia",
-      "score": 0.5
+      "score": 0.69
     },
     {
       "id": "rucula-baby",
@@ -248,7 +248,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.5
+      "score": 0.69
     },
     {
       "id": "tomatinho-cereja",
@@ -258,7 +258,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "Hortisabor",
-      "score": 0.5
+      "score": 0.69
     },
     {
       "id": "abobora-cabotia",
@@ -268,7 +268,7 @@
       "unidade": "pedaço",
       "detalhes": "",
       "marca": "",
-      "score": 0.33
+      "score": 0.23
     },
     {
       "id": "abobrinhas",
@@ -278,7 +278,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.33
+      "score": 0.24
     },
     {
       "id": "arroz-cateto",
@@ -288,7 +288,7 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "Camil",
-      "score": 0.33
+      "score": 0.22
     },
     {
       "id": "batatas-inglesas",
@@ -298,7 +298,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.33
+      "score": 0.24
     },
     {
       "id": "biscoito-mae-terra-coco",
@@ -308,7 +308,7 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "Mãe Terra",
-      "score": 0.33
+      "score": 0.27
     },
     {
       "id": "couve-flor",
@@ -318,7 +318,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.33
+      "score": 0.19
     },
     {
       "id": "quiabo",
@@ -328,7 +328,7 @@
       "unidade": "bandejas",
       "detalhes": "",
       "marca": "",
-      "score": 0.33
+      "score": 0.24
     },
     {
       "id": "agua-de-coco",
@@ -338,7 +338,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.14
     },
     {
       "id": "avocado",
@@ -348,7 +348,7 @@
       "unidade": "",
       "detalhes": "maduros",
       "marca": "",
-      "score": 0.17
+      "score": 0.14
     },
     {
       "id": "berinjelas",
@@ -358,7 +358,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.12
     },
     {
       "id": "beterraba",
@@ -368,7 +368,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.09
     },
     {
       "id": "biscoito-lev",
@@ -378,7 +378,7 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "Marilan",
-      "score": 0.17
+      "score": 0.13
     },
     {
       "id": "biscoito-mae-terra-maizena",
@@ -388,7 +388,7 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "Mãe Terra",
-      "score": 0.17
+      "score": 0.13
     },
     {
       "id": "bisnaguinha",
@@ -398,7 +398,7 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "Panco/Pullmann",
-      "score": 0.17
+      "score": 0.12
     },
     {
       "id": "chuchus",
@@ -408,7 +408,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.08
     },
     {
       "id": "cottagy-yorgus",
@@ -418,7 +418,7 @@
       "unidade": "pote grande",
       "detalhes": "",
       "marca": "Yorgus",
-      "score": 0.17
+      "score": 0.08
     },
     {
       "id": "couve-manteiga",
@@ -428,7 +428,7 @@
       "unidade": "maço",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.14
     },
     {
       "id": "ervilha-torta",
@@ -438,7 +438,7 @@
       "unidade": "bandejas",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.12
     },
     {
       "id": "espinafre",
@@ -448,7 +448,7 @@
       "unidade": "maço",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.12
     },
     {
       "id": "feijao-preto",
@@ -458,7 +458,7 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.13
     },
     {
       "id": "feijao-vermelho",
@@ -468,7 +468,7 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.09
     },
     {
       "id": "file-tilapia",
@@ -478,7 +478,7 @@
       "unidade": "bandeja",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.08
     },
     {
       "id": "granola-keto",
@@ -488,7 +488,7 @@
       "unidade": "pacote",
       "detalhes": "pacote verde",
       "marca": "Austrália",
-      "score": 0.17
+      "score": 0.14
     },
     {
       "id": "kiwi",
@@ -498,7 +498,7 @@
       "unidade": "",
       "detalhes": "maduros",
       "marca": "",
-      "score": 0.17
+      "score": 0.12
     },
     {
       "id": "lombinho-suino",
@@ -508,7 +508,7 @@
       "unidade": "g",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.1
     },
     {
       "id": "penne-de-cecco",
@@ -518,7 +518,7 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "De Cecco",
-      "score": 0.17
+      "score": 0.08
     },
     {
       "id": "presunto-parma",
@@ -528,7 +528,7 @@
       "unidade": "g",
       "detalhes": "fininho",
       "marca": "",
-      "score": 0.17
+      "score": 0.12
     },
     {
       "id": "queijo-cabra-cablanca",
@@ -538,7 +538,7 @@
       "unidade": "pedaço",
       "detalhes": "",
       "marca": "Cablanca",
-      "score": 0.17
+      "score": 0.12
     },
     {
       "id": "queijo-cabra-fresco",
@@ -548,7 +548,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.12
     },
     {
       "id": "requeijao",
@@ -558,7 +558,7 @@
       "unidade": "pote grande",
       "detalhes": "",
       "marca": "Tirolez",
-      "score": 0.17
+      "score": 0.14
     },
     {
       "id": "sobrecoxa",
@@ -568,7 +568,7 @@
       "unidade": "kg",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.14
     },
     {
       "id": "suco-laranja",
@@ -578,7 +578,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "Xandô",
-      "score": 0.17
+      "score": 0.14
     },
     {
       "id": "suco-uva",
@@ -588,7 +588,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "Aurora",
-      "score": 0.17
+      "score": 0.14
     },
     {
       "id": "uva-verde",
@@ -598,7 +598,7 @@
       "unidade": "",
       "detalhes": "",
       "marca": "Gota de Mel",
-      "score": 0.17
+      "score": 0.12
     },
     {
       "id": "vagem-francesa",
@@ -608,7 +608,7 @@
       "unidade": "bandejas",
       "detalhes": "",
       "marca": "",
-      "score": 0.17
+      "score": 0.1
     }
   ],
   "historico": [
@@ -1211,6 +1211,186 @@
         {
           "catalogoId": "ovos-vermelhos",
           "quantidade": "1 bandeja 20"
+        }
+      ]
+    },
+    {
+      "id": "lista-1774526873615",
+      "data": "2026-03-26",
+      "itens": [
+        {
+          "catalogoId": "bananas-prata",
+          "quantidade": "6"
+        },
+        {
+          "catalogoId": "cebolas",
+          "quantidade": "4"
+        },
+        {
+          "catalogoId": "iogurte-grego",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "leite-integral",
+          "quantidade": "2"
+        },
+        {
+          "catalogoId": "milho-sweet",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "morango",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "alho",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "file-peito-frango",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "limoes-tahity",
+          "quantidade": "6"
+        },
+        {
+          "catalogoId": "maca",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "mamao-papaya",
+          "quantidade": "3"
+        },
+        {
+          "catalogoId": "molho-de-tomate",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "mucarela",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "ovos-vermelhos",
+          "quantidade": "120"
+        },
+        {
+          "catalogoId": "pao-de-forma",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "patinho-moido",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "alface-americana",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "cenouras",
+          "quantidade": "2"
+        },
+        {
+          "catalogoId": "peito-de-peru",
+          "quantidade": "100"
+        },
+        {
+          "catalogoId": "rucula-baby",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "tomatinho-cereja",
+          "quantidade": "1"
+        }
+      ]
+    },
+    {
+      "id": "lista-1774526908202",
+      "data": "2026-03-26",
+      "itens": [
+        {
+          "catalogoId": "bananas-prata",
+          "quantidade": "6"
+        },
+        {
+          "catalogoId": "cebolas",
+          "quantidade": "4"
+        },
+        {
+          "catalogoId": "iogurte-grego",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "leite-integral",
+          "quantidade": "2"
+        },
+        {
+          "catalogoId": "milho-sweet",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "morango",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "alho",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "file-peito-frango",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "limoes-tahity",
+          "quantidade": "6"
+        },
+        {
+          "catalogoId": "maca",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "mamao-papaya",
+          "quantidade": "3"
+        },
+        {
+          "catalogoId": "molho-de-tomate",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "mucarela",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "ovos-vermelhos",
+          "quantidade": "120"
+        },
+        {
+          "catalogoId": "pao-de-forma",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "patinho-moido",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "alface-americana",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "cenouras",
+          "quantidade": "2"
+        },
+        {
+          "catalogoId": "peito-de-peru",
+          "quantidade": "100"
+        },
+        {
+          "catalogoId": "rucula-baby",
+          "quantidade": "1"
+        },
+        {
+          "catalogoId": "tomatinho-cereja",
+          "quantidade": "1"
         }
       ]
     }
