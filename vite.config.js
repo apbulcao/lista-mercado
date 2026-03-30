@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: '/lista-mercado/',
+  base: '/',
   test: {
     environment: 'jsdom',
     globals: true,
