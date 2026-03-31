@@ -13,9 +13,7 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
   }
 
   return (
-    <div
-      className={`flex items-center gap-3 px-2 py-2 rounded-xl transition-opacity duration-200 ${checked ? '' : 'opacity-50'}`}
-    >
+    <div className="flex items-center gap-3 px-2 py-2 rounded-xl transition-colors duration-150">
       {/* Checkbox */}
       <label className="relative flex items-center cursor-pointer shrink-0" style={{ minWidth: 40, minHeight: 40, justifyContent: 'center' }}>
         <input
@@ -43,17 +41,17 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
         </span>
       </label>
 
-      {/* Quantity pill */}
+      {/* Quantity stepper */}
       <div
         className="flex items-center shrink-0 rounded-lg overflow-hidden"
-        style={{ border: '1px solid #E5DDD0', backgroundColor: '#F7F2EB' }}
+        style={{ backgroundColor: '#F2EDE4' }}
       >
         <button
           type="button"
           onClick={() => handleQuantidadeChange(-1)}
           className="flex items-center justify-center transition-colors duration-150"
-          style={{ width: 26, height: 26, color: '#7A7267' }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EDE6DA'}
+          style={{ width: 26, height: 26, color: '#7A7267', background: 'transparent', border: 'none' }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#E8E0D4'}
           onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           aria-label="diminuir quantidade"
         >
@@ -65,22 +63,21 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
           type="text"
           value={quantidade}
           onChange={handleInputChange}
-          className="text-center text-sm font-medium focus:outline-none"
+          className="text-center text-sm font-semibold focus:outline-none"
           style={{
             width: '2.2rem',
-            color: '#1C1A16',
+            color: '#1A1814',
             backgroundColor: 'transparent',
-            borderLeft: '1px solid #E5DDD0',
-            borderRight: '1px solid #E5DDD0',
             height: 26,
+            border: 'none',
           }}
         />
         <button
           type="button"
           onClick={() => handleQuantidadeChange(1)}
           className="flex items-center justify-center transition-colors duration-150"
-          style={{ width: 26, height: 26, color: '#7A7267' }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#EDE6DA'}
+          style={{ width: 26, height: 26, color: '#7A7267', background: 'transparent', border: 'none' }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#E8E0D4'}
           onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           aria-label="aumentar quantidade"
         >
@@ -94,20 +91,20 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange }) {
       {/* Name + details */}
       <div className="flex flex-col min-w-0 flex-1">
         <span
-          className="text-sm font-medium"
+          className="text-sm font-semibold"
           style={{
-            color: '#1C1A16',
+            color: checked ? '#1A1814' : '#A09890',
             textDecoration: checked ? 'none' : 'line-through',
             textDecorationColor: '#C5BAB0',
           }}
         >
           {nome}
           {unidade && (
-            <span className="font-normal ml-1" style={{ color: '#9A8F83', fontSize: '0.72rem' }}>{unidade}</span>
+            <span className="font-normal ml-1" style={{ color: '#A09890', fontSize: '0.72rem' }}>{unidade}</span>
           )}
         </span>
         {(detalhes || marca) && (
-          <span className="truncate" style={{ fontSize: '0.72rem', color: '#9A8F83' }}>
+          <span className="truncate" style={{ fontSize: '0.7rem', color: '#A09890' }}>
             {[detalhes, marca].filter(Boolean).join(' · ')}
           </span>
         )}

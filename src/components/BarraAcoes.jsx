@@ -11,37 +11,53 @@ export default function BarraAcoes({ onCopiar, onConfirmar }) {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0"
+      className="fixed z-20"
       style={{
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        background: 'rgba(242, 237, 228, 0.92)',
-        backdropFilter: 'blur(14px)',
-        WebkitBackdropFilter: 'blur(14px)',
-        borderTop: '1px solid rgba(229, 221, 208, 0.8)',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
       }}
     >
-      <div className="max-w-lg mx-auto px-4 py-3 pb-4 flex gap-2.5">
+      <div
+        className="flex gap-2 items-center"
+        style={{
+          background: 'rgba(249,246,241,0.92)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid #E0D9CE',
+          borderRadius: '100px',
+          padding: '7px 10px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        }}
+      >
         <button
           onClick={handleCopiar}
-          className="flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200 active:scale-[0.98]"
+          className="flex items-center gap-2 font-semibold text-sm transition-all duration-200 active:scale-[0.97]"
           style={{
             backgroundColor: copiado ? '#52B788' : '#2D6A4F',
             color: '#fff',
-            letterSpacing: '0.01em',
+            border: 'none',
+            borderRadius: '100px',
+            padding: '9px 20px',
+            fontFamily: 'inherit',
+            cursor: 'pointer',
           }}
         >
           {copiado ? '✓ Copiado!' : '📋 Copiar para WhatsApp'}
         </button>
         <button
           onClick={onConfirmar}
-          className="px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 active:scale-[0.98]"
+          className="font-semibold text-sm transition-all duration-200 active:scale-[0.97]"
           style={{
-            border: '1.5px solid #2D6A4F',
-            color: '#2D6A4F',
             backgroundColor: 'transparent',
-            letterSpacing: '0.01em',
+            color: '#1A1814',
+            border: '1.5px solid #E0D9CE',
+            borderRadius: '100px',
+            padding: '9px 20px',
+            fontFamily: 'inherit',
+            cursor: 'pointer',
           }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(45,106,79,0.06)'}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#E0D9CE'}
           onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
         >
           Confirmar

@@ -16,20 +16,20 @@ describe('WelcomeHeader', () => {
     const morning = new Date(2026, 2, 20, 9, 0, 0)
     vi.setSystemTime(morning)
     render(<WelcomeHeader />)
-    expect(screen.getByRole('heading', { name: /Bom dia/i })).toBeInTheDocument()
+    expect(screen.getByText(/Bom dia/i)).toBeInTheDocument()
   })
 
   it('renders "Boa tarde" in the afternoon', () => {
     const afternoon = new Date(2026, 2, 20, 15, 0, 0)
     vi.setSystemTime(afternoon)
     render(<WelcomeHeader />)
-    expect(screen.getByRole('heading', { name: /Boa tarde/i })).toBeInTheDocument()
+    expect(screen.getByText(/Boa tarde/i)).toBeInTheDocument()
   })
 
   it('renders "Boa noite" at night', () => {
     const night = new Date(2026, 2, 20, 20, 0, 0)
     vi.setSystemTime(night)
     render(<WelcomeHeader />)
-    expect(screen.getByRole('heading', { name: /Boa noite/i })).toBeInTheDocument()
+    expect(screen.getByText(/Boa noite/i)).toBeInTheDocument()
   })
 })

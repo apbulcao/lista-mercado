@@ -21,11 +21,12 @@ describe('ListaItem', () => {
     expect(onToggle).toHaveBeenCalledWith('1')
   })
 
-  it('item desmarcado tem classe de opacidade', () => {
+  it('item desmarcado tem texto riscado', () => {
     const unchecked = { ...item, checked: false }
-    const { container } = render(
+    render(
       <ListaItem item={unchecked} onToggle={() => {}} onQuantidadeChange={() => {}} />
     )
-    expect(container.firstChild).toHaveClass('opacity-50')
+    const nome = screen.getByText('bananas prata')
+    expect(nome).toHaveStyle({ textDecoration: 'line-through' })
   })
 })

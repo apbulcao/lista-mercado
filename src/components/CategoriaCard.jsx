@@ -47,28 +47,32 @@ export default function CategoriaCard({
 
   return (
     <div
-      className="rounded-2xl overflow-hidden relative"
+      className="rounded-2xl overflow-hidden"
       style={{
-        backgroundColor: '#FDFAF7',
-        border: '1px solid #E5DDD0',
-        boxShadow: '0 1px 4px rgba(44,40,34,0.06)',
+        backgroundColor: '#FFFFFF',
+        border: '1px solid #E0D9CE',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
       }}
     >
-      {/* Barra colorida lateral */}
-      <div
-        className="absolute left-0 top-0 bottom-0 w-[3px]"
-        style={{ backgroundColor: cor, borderRadius: '4px 0 0 4px' }}
-      />
-
       {/* Header */}
-      <div className="flex items-center gap-2.5 px-4 pt-4 pb-2 pl-5">
-        <span className="text-base">{categoria.emoji}</span>
-        <span
-          className="text-xs font-semibold"
-          style={{ color: cor, letterSpacing: '0.08em' }}
-        >
-          {categoria.nome.toUpperCase()}
-        </span>
+      <div
+        className="flex items-center justify-between px-4 py-3 pl-5"
+        style={{
+          borderLeft: `3px solid ${cor}`,
+          background: `linear-gradient(to right, ${cor}0A, transparent)`,
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{categoria.emoji}</span>
+          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '0.92rem', fontWeight: 700, color: '#1A1814' }}>
+            {categoria.nome}
+          </span>
+        </div>
+        {itens.length > 0 && (
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${cor}20`, color: cor }}>
+            {itens.length}
+          </span>
+        )}
       </div>
 
       {/* Items */}

@@ -15,7 +15,7 @@ describe('CategoriaCard', () => {
   it('renderiza emoji e nome da categoria', () => {
     render(<CategoriaCard categoria={categoria} itens={itens} catalogoExtras={catalogoExtras} onToggle={() => {}} onQuantidadeChange={() => {}} onAdicionarItem={() => {}} />)
     expect(screen.getByText('🍎')).toBeInTheDocument()
-    expect(screen.getByText('FRUTAS')).toBeInTheDocument()
+    expect(screen.getByText('Frutas')).toBeInTheDocument()
   })
 
   it('renderiza todos os itens da categoria', () => {

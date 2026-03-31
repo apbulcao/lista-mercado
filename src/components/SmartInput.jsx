@@ -46,44 +46,50 @@ export default function SmartInput({ onAddItems }) {
   }
 
   return (
-    <div
-      className="rounded-2xl p-4 mb-2"
-      style={{
-        backgroundColor: '#FDFAF7',
-        border: '1px solid #E5DDD0',
-        boxShadow: '0 1px 4px rgba(44,40,34,0.06)',
-      }}
-    >
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Ex: 2 leites, pão... ou: tira o leite"
-          className="flex-1 px-4 py-2.5 rounded-xl text-sm focus:outline-none transition-colors duration-200"
-          style={{
-            backgroundColor: '#F2EDE4',
-            border: '1px solid #E5DDD0',
-            color: '#1C1A16',
-          }}
-          disabled={loading}
-        />
-        <button
-          type="submit"
-          disabled={loading || !text.trim()}
-          className="px-4 py-2.5 rounded-xl font-medium text-sm text-white transition-all duration-200 disabled:opacity-40 flex items-center justify-center"
-          style={{ backgroundColor: '#2D6A4F', minWidth: '3.5rem' }}
-        >
-          {loading ? (
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : (
-            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-            </svg>
-          )}
-        </button>
-      </form>
-      {error && <p className="text-xs mt-2" style={{ color: '#C96442' }}>{error}</p>}
+    <div className="mb-1">
+      <div className="flex items-center gap-1.5 mb-1.5" style={{ fontSize: '10px', fontWeight: 600, color: '#2D6A4F', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+        ✨ Entrada inteligente com IA
+      </div>
+      <div
+        className="rounded-2xl p-3"
+        style={{
+          backgroundColor: '#FFFFFF',
+          border: '1.5px solid #E0D9CE',
+          boxShadow: '0 1px 4px rgba(44,40,34,0.04)',
+        }}
+      >
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Ex: 2 leites, pão... ou: tira o leite"
+            className="flex-1 px-3 py-2.5 rounded-xl text-sm focus:outline-none transition-colors duration-200"
+            style={{
+              backgroundColor: '#F4F0E8',
+              border: '1px solid #E0D9CE',
+              color: '#1A1814',
+              fontFamily: 'inherit',
+            }}
+            disabled={loading}
+          />
+          <button
+            type="submit"
+            disabled={loading || !text.trim()}
+            className="px-4 py-2.5 rounded-xl font-medium text-sm text-white transition-all duration-200 disabled:opacity-40 flex items-center justify-center"
+            style={{ backgroundColor: '#2D6A4F', minWidth: '3.5rem', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            {loading ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+              </svg>
+            )}
+          </button>
+        </form>
+        {error && <p className="text-xs mt-2" style={{ color: '#C96442' }}>{error}</p>}
+      </div>
     </div>
   )
 }

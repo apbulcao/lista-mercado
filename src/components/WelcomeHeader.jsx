@@ -36,16 +36,21 @@ export default function WelcomeHeader() {
 
   return (
     <div
-      className="px-4 py-4 mb-1 rounded-2xl overflow-hidden"
+      className="px-4 py-4 mb-1 rounded-2xl"
       style={{
-        background: 'linear-gradient(135deg, rgba(45,106,79,0.07) 0%, rgba(82,183,136,0.04) 100%)',
-        border: '1px solid #E5DDD0',
+        backgroundColor: '#F9F6F1',
+        border: '1px solid #E0D9CE',
       }}
     >
-      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.35rem', fontStyle: 'italic', fontWeight: 600, color: '#2D6A4F', lineHeight: 1.2, marginBottom: '0.35rem' }}>
-        {saudacao}! 🍀
+      <div className="text-xs font-semibold uppercase mb-1" style={{ color: '#2D6A4F', letterSpacing: '0.06em' }}>
+        {hora >= 18 || hora < 5 ? '🌙' : hora >= 12 ? '☀️' : '🌤️'} {saudacao}
+      </div>
+      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.1rem', fontWeight: 700, color: '#1A1814', lineHeight: 1.25, marginBottom: '5px' }}>
+        Vamos montar a lista de hoje?
       </h2>
-      <p style={{ fontSize: '0.8rem', color: '#9A8F83', fontStyle: 'italic', lineHeight: 1.45 }}>{frase}</p>
+      <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '0.75rem', fontStyle: 'italic', color: '#7A7267', lineHeight: 1.4 }}>
+        "{frase}"
+      </p>
     </div>
   )
 }

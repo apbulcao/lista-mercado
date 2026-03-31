@@ -291,20 +291,44 @@ export default function App() {
   const hoje = new Date()
   const diaFormatado = `${String(hoje.getDate()).padStart(2, '0')}/${String(hoje.getMonth() + 1).padStart(2, '0')}`
 
+  const totalChecked = listaAtual.filter((i) => i.checked).length
+  const contsPorCategoria = Object.fromEntries(
+    CATEGORIAS.map((cat) => [cat.id, listaAtual.filter((i) => i.categoria === cat.id).length])
+  )
+
+  const hora = new Date().getHours()
+  const saudacao = hora >= 18 || hora < 5 ? 'Boa noite' : hora >= 12 ? 'Boa tarde' : 'Bom dia'
+  const SABEDORIAS_SIDEBAR = [
+    'Organização no mercado é tempo na vida.',
+    'Lista feita com calma evita carrinho com drama.',
+    'Quem planeja a semana, domina o carrinho.',
+  ]
+  const diaDoAno = Math.floor((hoje - new Date(hoje.getFullYear(), 0, 0)) / 86400000)
+  const fraseSidebar = SABEDORIAS_SIDEBAR[diaDoAno % SABEDORIAS_SIDEBAR.length]
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F2EDE4' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#EDE8DF' }}>
       {/* Header */}
-      <header className="sticky top-0 z-10 px-4 py-3 flex items-center justify-between max-w-lg mx-auto" style={{ backgroundColor: 'rgba(253,250,247,0.95)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderBottom: '1px solid #E5DDD0' }}>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.2rem', fontWeight: 600, color: '#2D6A4F', letterSpacing: '-0.01em' }}>
+      <header
+        className="sticky top-0 z-10 px-5 flex items-center justify-between"
+        style={{
+          height: '52px',
+          backgroundColor: 'rgba(249,246,241,0.88)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderBottom: '1px solid #E0D9CE',
+        }}
+      >
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.1rem', fontWeight: 500, color: '#2D6A4F' }}>
           Lista Mercado
         </h1>
         <div className="flex items-center gap-2">
-          <span className="text-sm" style={{ color: '#9A9186' }}>{diaFormatado}</span>
+          <span className="text-xs font-medium" style={{ color: '#7A7267' }}>{diaFormatado}</span>
           <button
             onClick={() => setView(view === 'lista' ? 'historico' : 'lista')}
-            className="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors duration-200"
-            style={{ border: '1px solid #E5DDD0', color: '#5A5449', backgroundColor: 'transparent' }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F2EDE4'}
+            className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors duration-200"
+            style={{ border: '1px solid #E0D9CE', color: '#5A5449', backgroundColor: 'transparent' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#E0D9CE'}
             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             {view === 'lista' ? 'Histórico' : 'Voltar'}
@@ -312,8 +336,8 @@ export default function App() {
           <button
             onClick={() => setConfigAberto(true)}
             className="text-sm px-2 py-1.5 rounded-lg transition-colors duration-200"
-            style={{ border: '1px solid #E5DDD0', color: '#5A5449', backgroundColor: 'transparent' }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F2EDE4'}
+            style={{ border: '1px solid #E0D9CE', color: '#5A5449', backgroundColor: 'transparent' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#E0D9CE'}
             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             ⚙️
@@ -321,42 +345,103 @@ export default function App() {
         </div>
       </header>
 
-      {/* Content */}
-      <main className="max-w-lg mx-auto px-4 py-4 pb-28 space-y-4">
-        {view === 'lista' ? (
-          <>
-            <WelcomeHeader />
-            <SmartInput onAddItems={handleSmartInputItems} />
-            {CATEGORIAS.map((cat) => {
-              const catItens = listaAtual.filter((i) => i.categoria === cat.id)
-              const catalogoExtras = dados.catalogo.filter(
-                (c) => c.categoria === cat.id && !listaAtual.some((l) => l.id === c.id)
-              )
+      {/* Layout responsivo */}
+      <div className="max-w-5xl mx-auto px-4 md:px-6 md:grid md:gap-6" style={{ gridTemplateColumns: '240px 1fr' }}>
 
-              if (catItens.length === 0 && catalogoExtras.length === 0) return null
+        {/* Sidebar — desktop only */}
+        <aside
+          className="hidden md:block py-7 pr-2"
+          style={{ position: 'sticky', top: '52px', height: 'calc(100vh - 52px)', overflowY: 'auto' }}
+        >
+          {/* Greeting */}
+          <div className="mb-6">
+            <div className="text-xs font-semibold uppercase mb-1.5" style={{ color: '#2D6A4F', letterSpacing: '0.06em' }}>
+              {hora >= 18 || hora < 5 ? '🌙' : hora >= 12 ? '☀️' : '🌤️'} {saudacao}
+            </div>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', fontWeight: 700, color: '#1A1814', lineHeight: 1.2, marginBottom: '8px' }}>
+              Vamos montar<br />a lista de hoje?
+            </h2>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: '0.8rem', fontStyle: 'italic', color: '#7A7267', lineHeight: 1.5 }}>
+              "{fraseSidebar}"
+            </p>
+          </div>
 
-              return (
-                <CategoriaCard
-                  key={cat.id}
-                  categoria={cat}
-                  itens={catItens}
-                  catalogoExtras={catalogoExtras}
-                  onToggle={handleToggle}
-                  onQuantidadeChange={handleQuantidadeChange}
-                  onAdicionarItem={handleAdicionarDoCatalogo}
-                />
-              )
-            })}
-            <AdicionarItemNovo onAdicionar={handleAdicionarNovo} />
-          </>
-        ) : (
-          <Historico historico={dados.historico} catalogo={dados.catalogo} />
-        )}
-      </main>
+          {/* Divisor */}
+          <div style={{ height: '1px', backgroundColor: '#E0D9CE', margin: '16px 0' }} />
 
-      {/* Footer actions - only on lista view */}
+          {/* Resumo */}
+          <div className="text-xs font-semibold uppercase mb-2.5" style={{ color: '#7A7267', letterSpacing: '0.07em' }}>Resumo</div>
+          <div className="grid grid-cols-2 gap-2 mb-5">
+            <div className="rounded-xl p-2.5" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0D9CE' }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.3rem', fontWeight: 700, color: '#2D6A4F', lineHeight: 1 }}>{totalChecked}</div>
+              <div className="text-xs mt-0.5" style={{ color: '#7A7267' }}>selecionados</div>
+            </div>
+            <div className="rounded-xl p-2.5" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0D9CE' }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.3rem', fontWeight: 700, color: '#2D6A4F', lineHeight: 1 }}>{listaAtual.length}</div>
+              <div className="text-xs mt-0.5" style={{ color: '#7A7267' }}>itens total</div>
+            </div>
+          </div>
+
+          {/* Navegação por categoria */}
+          <div className="text-xs font-semibold uppercase mb-2.5" style={{ color: '#7A7267', letterSpacing: '0.07em' }}>Categorias</div>
+          <nav className="flex flex-col gap-1">
+            {CATEGORIAS.map((cat) => (
+              <div
+                key={cat.id}
+                className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium"
+                style={{ color: contsPorCategoria[cat.id] > 0 ? '#1A1814' : '#B0AA9F' }}
+              >
+                <span>{cat.emoji}</span>
+                <span className="truncate flex-1">{cat.nome}</span>
+                {contsPorCategoria[cat.id] > 0 && (
+                  <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#E0EDE7', color: '#2D6A4F' }}>
+                    {contsPorCategoria[cat.id]}
+                  </span>
+                )}
+              </div>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Main content */}
+        <main className="py-5 pb-32 space-y-3 min-w-0">
+          {view === 'lista' ? (
+            <>
+              {/* Greeting mobile only */}
+              <div className="md:hidden">
+                <WelcomeHeader />
+              </div>
+
+              <SmartInput onAddItems={handleSmartInputItems} />
+
+              {CATEGORIAS.map((cat) => {
+                const catItens = listaAtual.filter((i) => i.categoria === cat.id)
+                const catalogoExtras = dados.catalogo.filter(
+                  (c) => c.categoria === cat.id && !listaAtual.some((l) => l.id === c.id)
+                )
+                if (catItens.length === 0 && catalogoExtras.length === 0) return null
+                return (
+                  <CategoriaCard
+                    key={cat.id}
+                    categoria={cat}
+                    itens={catItens}
+                    catalogoExtras={catalogoExtras}
+                    onToggle={handleToggle}
+                    onQuantidadeChange={handleQuantidadeChange}
+                    onAdicionarItem={handleAdicionarDoCatalogo}
+                  />
+                )
+              })}
+              <AdicionarItemNovo onAdicionar={handleAdicionarNovo} />
+            </>
+          ) : (
+            <Historico historico={dados.historico} catalogo={dados.catalogo} />
+          )}
+        </main>
+      </div>
+
       {view === 'lista' && (
-         <BarraAcoes onCopiar={handleCopiar} onConfirmar={handleConfirmar} />
+        <BarraAcoes onCopiar={handleCopiar} onConfirmar={handleConfirmar} />
       )}
 
       <FeedbackModal />
