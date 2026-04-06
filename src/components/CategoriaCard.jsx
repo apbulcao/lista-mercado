@@ -47,7 +47,7 @@ export default function CategoriaCard({
 
   return (
     <div
-      className="rounded-2xl overflow-hidden"
+      className="rounded-2xl"
       style={{
         backgroundColor: '#FFFFFF',
         border: '1px solid #E0D9CE',
@@ -56,7 +56,7 @@ export default function CategoriaCard({
     >
       {/* Header */}
       <div
-        className="flex items-center justify-between px-4 py-3 pl-5"
+        className="rounded-t-2xl flex items-center justify-between px-4 py-3 pl-5"
         style={{
           borderLeft: `3px solid ${cor}`,
           background: `linear-gradient(to right, ${cor}0A, transparent)`,

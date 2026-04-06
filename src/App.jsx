@@ -84,7 +84,7 @@ export default function App() {
     const slugBase = slugifyNomeItem(nome)
     if (!slugBase) {
       alert('Digite um nome de item valido.')
-      return
+      return false
     }
 
     const itemExistente = dados.catalogo.find(
@@ -92,8 +92,12 @@ export default function App() {
     )
 
     if (itemExistente) {
+      if (listaAtual.some((l) => l.id === itemExistente.id)) {
+        alert(`"${itemExistente.nome}" ja esta na lista.`)
+        return false
+      }
       handleAdicionarDoCatalogo(itemExistente.id)
-      return
+      return true
     }
 
     const id = criarIdItem(nome, dados.catalogo)
@@ -115,6 +119,7 @@ export default function App() {
       ...prev,
       { ...novoItem, quantidade: '1', checked: true },
     ])
+    return true
   }
 
   function handleSmartInputItems(items) {

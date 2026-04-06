@@ -10,10 +10,12 @@ export default function AdicionarItemNovo({ onAdicionar }) {
     e.preventDefault()
     const nomeTrimmed = nome.trim()
     if (!nomeTrimmed) return
-    onAdicionar(nomeTrimmed, categoria)
-    setNome('')
-    setCategoria('outros')
-    setAberto(false)
+    const adicionado = onAdicionar(nomeTrimmed, categoria)
+    if (adicionado !== false) {
+      setNome('')
+      setCategoria('outros')
+      setAberto(false)
+    }
   }
 
   if (!aberto) {

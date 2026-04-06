@@ -16,7 +16,7 @@ describe('aiService', () => {
       expect(payload.url).toBe('https://api.groq.com/openai/v1/chat/completions')
       expect(payload.headers.Authorization).toBe('Bearer fake-key')
       expect(payload.body.messages[1].content).toBe(text)
-      expect(payload.body.model).toBe('llama3-8b-8192')
+      expect(payload.body.model).toBe('llama-3.1-8b-instant')
     })
     
     it('builds correct payload for openrouter', () => {
