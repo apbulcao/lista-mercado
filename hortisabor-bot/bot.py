@@ -30,7 +30,16 @@ class _ReauthState:
     page: Optional[Page] = None
 
     def aberto(self) -> bool:
-        return self.browser is not None
+        if self.browser is None:
+            return False
+        if not self.browser.is_connected():
+            # Browser foi fechado externamente — limpa estado sem tentar fechar
+            self.playwright = None
+            self.browser = None
+            self.context = None
+            self.page = None
+            return False
+        return True
 
 
 _reauth = _ReauthState()
@@ -66,10 +75,8 @@ app.add_middleware(
 # Seletores DOM do Hortisabor — descobertos via descobrir_seletores.py
 # Atualizar se o site mudar layout
 # ---------------------------------------------------------------------------
-SEL_BUSCA = 'input[placeholder*="buscar" i]'
-SEL_RESULTADO_ITEM = '[class*="product"]:first-child'
-SEL_ADICIONAR = 'button[class*="add" i]'
-SEL_QUANTIDADE = 'input[type="number"]'
+SEL_BUSCA = '#search-term'
+SEL_QUANTIDADE = 'input.vip-spin__quantity'
 URL_HOME = 'https://www.delivery.hortisabor.com.br/'
 URL_LOGIN = 'https://www.delivery.hortisabor.com.br/login/'
 URL_CARRINHO = 'https://www.delivery.hortisabor.com.br/carrinho/'
@@ -110,24 +117,34 @@ async def _finalizar_reauth():
 async def _adicionar_item(page, item: ItemRequest, termo: str) -> bool:
     """Busca um item e adiciona ao carrinho. Retorna True se encontrado."""
     try:
-        campo_busca = page.locator(SEL_BUSCA).first
+        campo_busca = page.locator(SEL_BUSCA)
         await campo_busca.click()
         await campo_busca.fill(termo)
         await campo_busca.press('Enter')
 
-        primeiro_resultado = page.locator(SEL_RESULTADO_ITEM).first
-        await primeiro_resultado.wait_for(state='visible', timeout=10000)
-        await primeiro_resultado.click()
-        await page.wait_for_load_state('networkidle', timeout=10000)
+        # Aguarda resultados carregarem (Angular renderiza após request)
+        btn_adicionar = page.locator('button', has_text='Adicionar').first
+        sem_resultado = page.locator('button', has_text='Nenhum resultado encontrado')
 
-        if item.quantidade and item.quantidade != '1':
-            campo_qtd = page.locator(SEL_QUANTIDADE).first
-            if await campo_qtd.is_visible():
-                await campo_qtd.fill(item.quantidade)
+        # Espera pelo primeiro que aparecer: resultado ou ausência de resultado
+        await page.wait_for_selector(
+            'button:text("Adicionar"), button:text("Nenhum resultado encontrado")',
+            timeout=12000,
+        )
 
-        btn = page.locator(SEL_ADICIONAR).first
-        await btn.click()
-        await page.wait_for_timeout(1000)
+        if await sem_resultado.is_visible():
+            print(f'[bot] Sem resultados para: {termo}')
+            return False
+
+        # Ajusta quantidade antes de adicionar (campo já visível no card)
+        if item.quantidade and item.quantidade not in ('', '1'):
+            qtd_input = page.locator(SEL_QUANTIDADE).first
+            if await qtd_input.is_visible():
+                await qtd_input.triple_click()
+                await qtd_input.fill(item.quantidade)
+
+        await btn_adicionar.click()
+        await page.wait_for_timeout(1500)
         return True
 
     except Exception as e:
