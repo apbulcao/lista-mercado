@@ -4,16 +4,18 @@ import { CATEGORIAS } from '../lib/data'
 export default function AdicionarItemNovo({ onAdicionar }) {
   const [nome, setNome] = useState('')
   const [categoria, setCategoria] = useState('outros')
+  const [url, setUrl] = useState('')
   const [aberto, setAberto] = useState(false)
 
   function handleSubmit(e) {
     e.preventDefault()
     const nomeTrimmed = nome.trim()
     if (!nomeTrimmed) return
-    const adicionado = onAdicionar(nomeTrimmed, categoria)
+    const adicionado = onAdicionar(nomeTrimmed, categoria, url.trim())
     if (adicionado !== false) {
       setNome('')
       setCategoria('outros')
+      setUrl('')
       setAberto(false)
     }
   }
@@ -57,6 +59,19 @@ export default function AdicionarItemNovo({ onAdicionar }) {
             </option>
           ))}
         </select>
+        <div>
+          <input
+            type="url"
+            placeholder="Cole o link do produto no Hortisabor (opcional)"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors duration-200"
+            style={{ color: '#1C1A16', border: '1px solid #E5DDD0', backgroundColor: '#F2EDE4' }}
+          />
+          <p className="text-xs mt-1" style={{ color: '#A09890' }}>
+            Se não souber agora, o bot vai pedir na próxima compra.
+          </p>
+        </div>
         <div className="flex gap-2">
           <button
             type="submit"
@@ -71,6 +86,7 @@ export default function AdicionarItemNovo({ onAdicionar }) {
               setAberto(false)
               setNome('')
               setCategoria('outros')
+              setUrl('')
             }}
             className="px-4 py-2.5 rounded-lg text-sm font-medium transition-colors duration-200"
             style={{ color: '#7A7267', border: '1px solid #E5DDD0', backgroundColor: 'transparent' }}
