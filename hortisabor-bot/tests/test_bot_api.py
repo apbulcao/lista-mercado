@@ -1,6 +1,13 @@
 from unittest.mock import patch
 import pytest
 
+PAYLOAD_BASE = {
+    'itens': [{'nome': 'leite integral', 'quantidade': '2', 'marca': '', 'detalhes': ''}],
+    'ai_provider': 'groq',
+    'ai_api_key': '',
+    'ai_url': '',
+}
+
 
 @pytest.fixture(autouse=True)
 def mock_playwright(monkeypatch):
@@ -29,9 +36,7 @@ def test_montar_carrinho_sem_cookies_retorna_reauth(monkeypatch):
     monkeypatch.setattr(bot, '_abrir_reauth', fake_abrir_reauth, raising=False)
 
     client = TestClient(bot.app)
-    response = client.post('/montar-carrinho', json=[
-        {'nome': 'leite integral', 'quantidade': '2', 'marca': '', 'detalhes': ''}
-    ])
+    response = client.post('/montar-carrinho', json=PAYLOAD_BASE)
     assert response.status_code == 200
     assert response.json()['status'] == 'reauth_needed'
 
@@ -43,20 +48,15 @@ def test_montar_carrinho_com_cookies_chama_headless(monkeypatch):
     cookies = [{'name': 'session', 'value': 'abc', 'domain': '.hortisabor.com.br'}]
     monkeypatch.setattr(bot, 'carregar_cookies', lambda: cookies)
 
-    resultado_fake = {
-        'encontrados': ['leite integral'],
-        'nao_encontrados': [],
-    }
+    resultado_fake = {'encontrados': ['leite integral'], 'nao_encontrados': []}
 
-    async def fake_executar_headless(cookies, itens):
+    async def fake_executar_headless(cookies, itens, ai_config):
         return resultado_fake
 
     monkeypatch.setattr(bot, '_executar_headless', fake_executar_headless, raising=False)
 
     client = TestClient(bot.app)
-    response = client.post('/montar-carrinho', json=[
-        {'nome': 'leite integral', 'quantidade': '2', 'marca': '', 'detalhes': ''}
-    ])
+    response = client.post('/montar-carrinho', json=PAYLOAD_BASE)
     assert response.status_code == 200
     data = response.json()
     assert data['status'] == 'ok'
@@ -72,7 +72,7 @@ def test_montar_carrinho_cookies_expirados_retorna_reauth(monkeypatch):
     monkeypatch.setattr(bot, 'carregar_cookies', lambda: cookies)
     monkeypatch.setattr(bot, 'limpar_cookies', lambda: None)
 
-    async def fake_headless_expirado(cookies, itens):
+    async def fake_headless_expirado(cookies, itens, ai_config):
         return None
 
     async def fake_abrir_reauth():
@@ -82,8 +82,6 @@ def test_montar_carrinho_cookies_expirados_retorna_reauth(monkeypatch):
     monkeypatch.setattr(bot, '_abrir_reauth', fake_abrir_reauth, raising=False)
 
     client = TestClient(bot.app)
-    response = client.post('/montar-carrinho', json=[
-        {'nome': 'leite', 'quantidade': '1', 'marca': '', 'detalhes': ''}
-    ])
+    response = client.post('/montar-carrinho', json=PAYLOAD_BASE)
     assert response.status_code == 200
     assert response.json()['status'] == 'reauth_needed'
