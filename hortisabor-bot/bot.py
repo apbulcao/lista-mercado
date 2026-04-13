@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import Optional
 import httpx
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page, Playwright
@@ -14,6 +14,7 @@ from session import carregar_cookies, salvar_cookies, limpar_cookies
 # ---------------------------------------------------------------------------
 
 class ItemRequest(BaseModel):
+    id: str = ''
     nome: str
     quantidade: str
     marca: str = ''
@@ -52,6 +53,31 @@ class _ReauthState:
 
 
 _reauth = _ReauthState()
+
+
+class _MontagemState:
+    def __init__(self):
+        self.estado: str = 'idle'       # idle | processando | aguardando_url | concluido | erro
+        self.item_atual: str = ''
+        self.item_id: str = ''
+        self.progresso: dict = {'feitos': 0, 'total': 0}
+        self.encontrados: list = []
+        self.nao_encontrados: list = []
+        self._url_event = None          # asyncio.Event — criado na hora
+        self._url_fornecida: str = ''
+
+    def reset(self, total: int) -> None:
+        self.estado = 'processando'
+        self.item_atual = ''
+        self.item_id = ''
+        self.progresso = {'feitos': 0, 'total': total}
+        self.encontrados = []
+        self.nao_encontrados = []
+        self._url_event = None
+        self._url_fornecida = ''
+
+
+_montagem = _MontagemState()
 
 # ---------------------------------------------------------------------------
 # App
@@ -405,19 +431,90 @@ async def _executar_headless(cookies, itens: list[ItemRequest], ai_config: dict)
         await pw.stop()
 
 
+async def _processar_montagem(itens: list[ItemRequest], cookies: list, ai_config: dict) -> None:
+    """Processa itens em background; pausa com asyncio.Event quando precisa de URL."""
+    pw = await async_playwright().start()
+    browser = await pw.chromium.launch(headless=True)
+    context = await browser.new_context()
+    await context.add_cookies(cookies)
+    page = await context.new_page()
+
+    try:
+        await page.goto(URL_HOME, wait_until='networkidle', timeout=30000)
+
+        if '/login/' in page.url:
+            _montagem.estado = 'erro'
+            return
+
+        await _fechar_modal_entrega(page)
+
+        for item in itens:
+            _montagem.estado = 'processando'
+            _montagem.item_atual = item.nome
+            _montagem.item_id = item.id
+
+            url = item.url_hortisabor
+            if not url:
+                _montagem.estado = 'aguardando_url'
+                _montagem._url_event = asyncio.Event()
+                await _montagem._url_event.wait()
+                url = _montagem._url_fornecida
+
+            item_com_url = ItemRequest(
+                id=item.id,
+                nome=item.nome,
+                quantidade=item.quantidade,
+                marca=item.marca,
+                detalhes=item.detalhes,
+                url_hortisabor=url,
+            )
+            termo = f'{item.nome} {item.marca}'.strip()
+            adicionado = await _adicionar_item(page, item_com_url, termo, ai_config)
+
+            if adicionado:
+                _montagem.encontrados.append(item.nome)
+            else:
+                _montagem.nao_encontrados.append(item.nome)
+
+            _montagem.progresso['feitos'] += 1
+
+        _montagem.estado = 'concluido'
+
+    except Exception as e:
+        print(f'[bot] Erro na montagem: {e}')
+        restantes = [i.nome for i in itens if i.nome not in _montagem.encontrados]
+        _montagem.nao_encontrados.extend(restantes)
+        _montagem.estado = 'erro'
+
+    finally:
+        await browser.close()
+        await pw.stop()
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
 
 @app.get('/status')
 async def status():
-    return {'ok': True}
+    return {
+        'ok': True,
+        'montagem': {
+            'estado': _montagem.estado,
+            'item_atual': _montagem.item_atual,
+            'item_id': _montagem.item_id,
+            'progresso': _montagem.progresso,
+            'encontrados': _montagem.encontrados,
+            'nao_encontrados': _montagem.nao_encontrados,
+        },
+    }
 
 
-@app.post('/montar-carrinho')
-async def montar_carrinho(req: MontagemRequest):
-    itens = req.itens
-    ai_config = {'provider': req.ai_provider, 'api_key': req.ai_api_key, 'api_url': req.ai_url}
+@app.post('/iniciar-montagem')
+async def iniciar_montagem(req: MontagemRequest):
+    if _montagem.estado in ('processando', 'aguardando_url'):
+        raise HTTPException(status_code=409, detail='Montagem já em andamento')
+
     cookies = carregar_cookies()
 
     if not cookies:
@@ -432,17 +529,8 @@ async def montar_carrinho(req: MontagemRequest):
         if not cookies:
             return {'status': 'reauth_needed', 'mensagem': 'Erro ao salvar sessão. Tente novamente.'}
 
-    resultado = await _executar_headless(cookies, itens, ai_config)
+    ai_config = {'provider': req.ai_provider, 'api_key': req.ai_api_key, 'api_url': req.ai_url}
+    _montagem.reset(total=len(req.itens))
+    asyncio.create_task(_processar_montagem(req.itens, cookies, ai_config))
 
-    if resultado is None:
-        limpar_cookies()
-        if not _reauth.aberto():
-            await _abrir_reauth()
-        return {'status': 'reauth_needed', 'mensagem': 'Sessão expirada. Faça login na janela que abriu.'}
-
-    return {
-        'status': 'ok',
-        'url_carrinho': URL_CARRINHO,
-        'encontrados': resultado['encontrados'],
-        'nao_encontrados': resultado['nao_encontrados'],
-    }
+    return {'status': 'iniciado'}
