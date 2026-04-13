@@ -71,6 +71,12 @@ export default function App() {
     return () => clearInterval(intervalo)
   }, [])
 
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current)
+    }
+  }, [])
+
   function handleToggle(id) {
     setListaAtual((prev) =>
       prev.map((item) =>
@@ -327,6 +333,7 @@ export default function App() {
       }
 
       // Iniciar polling
+      if (pollingRef.current) clearInterval(pollingRef.current)
       pollingRef.current = setInterval(async () => {
         try {
           const statusRes = await fetch('http://localhost:7430/status')
@@ -358,22 +365,30 @@ export default function App() {
   }
 
   async function handleFornecerUrl(itemId, url) {
-    await handleUrlHortisaborChange(itemId, url)
-    await fetch('http://localhost:7430/fornecer-url', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ item_id: itemId, url }),
-    })
-    setPedidoStatus('loading')
+    try {
+      await handleUrlHortisaborChange(itemId, url)
+      await fetch('http://localhost:7430/fornecer-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_id: itemId, url }),
+      })
+      setPedidoStatus('loading')
+    } catch {
+      setPedidoStatus('error')
+    }
   }
 
   async function handlePularItem() {
-    await fetch('http://localhost:7430/fornecer-url', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ item_id: '', url: '' }),
-    })
-    setPedidoStatus('loading')
+    try {
+      await fetch('http://localhost:7430/fornecer-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_id: '', url: '' }),
+      })
+      setPedidoStatus('loading')
+    } catch {
+      setPedidoStatus('error')
+    }
   }
 
   if (loading) {
