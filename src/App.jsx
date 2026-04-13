@@ -57,6 +57,23 @@ export default function App() {
   }
 
   useEffect(() => {
+    // Lê params de setup do hash da URL (#setup&token=X&repo=Y&groq=Z)
+    // Injetados pelo iniciar.command para configurar o app automaticamente
+    const hash = window.location.hash
+    if (hash.startsWith('#setup')) {
+      const params = new URLSearchParams(hash.slice(1))
+      const token = params.get('token')
+      const repo = params.get('repo')
+      const groq = params.get('groq')
+      if (token) localStorage.setItem('lista-mercado-gh-token', token)
+      if (repo) localStorage.setItem('lista-mercado-gh-repo', repo)
+      if (groq) {
+        localStorage.setItem('lista-mercado-ai-provider', 'groq')
+        localStorage.setItem('lista-mercado-ai-key', groq)
+      }
+      // Limpa o hash para não expor tokens na URL
+      history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
     carregarApp()
   }, [])
 
