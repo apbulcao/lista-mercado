@@ -26,6 +26,9 @@ export default function App() {
   const [configAberto, setConfigAberto] = useState(false)
   const [loading, setLoading] = useState(true)
   const [erroCarregamento, setErroCarregamento] = useState('')
+  const [botOnline, setBotOnline] = useState(false)
+  const [pedidoStatus, setPedidoStatus] = useState(null)
+  // pedidoStatus: null | 'loading' | 'reauth' | 'error' | { url, encontrados, nao_encontrados }
 
   async function carregarApp() {
     setLoading(true)
@@ -52,6 +55,12 @@ export default function App() {
 
   useEffect(() => {
     carregarApp()
+  }, [])
+
+  useEffect(() => {
+    fetch('http://localhost:7430/status')
+      .then(r => { if (r.ok) setBotOnline(true) })
+      .catch(() => {})
   }, [])
 
   function handleToggle(id) {
@@ -262,6 +271,40 @@ export default function App() {
     }
   }
 
+  async function handlePedirHortisabor() {
+    const checkedItens = getItensSelecionadosValidos()
+    if (!checkedItens) return
+
+    setPedidoStatus('loading')
+
+    try {
+      const res = await fetch('http://localhost:7430/montar-carrinho', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          checkedItens.map(i => ({
+            nome: i.nome,
+            quantidade: i.quantidade,
+            marca: i.marca || '',
+            detalhes: i.detalhes || '',
+          }))
+        ),
+      })
+
+      const data = await res.json()
+
+      if (data.status === 'reauth_needed') {
+        setPedidoStatus('reauth')
+      } else if (data.status === 'ok') {
+        setPedidoStatus({ url: data.url_carrinho, encontrados: data.encontrados, nao_encontrados: data.nao_encontrados })
+      } else {
+        setPedidoStatus('error')
+      }
+    } catch {
+      setPedidoStatus('error')
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3" style={{ backgroundColor: '#F2EDE4' }}>
@@ -446,7 +489,99 @@ export default function App() {
       </div>
 
       {view === 'lista' && (
-        <BarraAcoes onCopiar={handleCopiar} onConfirmar={handleConfirmar} />
+        <BarraAcoes
+          onCopiar={handleCopiar}
+          onConfirmar={handleConfirmar}
+          botOnline={botOnline}
+          onPedirHortisabor={handlePedirHortisabor}
+        />
+      )}
+
+      {pedidoStatus && (
+        <div
+          className="fixed inset-0 z-30 flex items-end justify-center pb-28 px-4"
+          style={{ pointerEvents: 'none' }}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl p-4 shadow-xl space-y-3"
+            style={{
+              backgroundColor: '#FDFAF7',
+              border: '1px solid #E0D9CE',
+              pointerEvents: 'all',
+            }}
+          >
+            {pedidoStatus === 'loading' && (
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 border-2 border-gray-200 border-t-[#2D6A4F] rounded-full animate-spin flex-shrink-0" />
+                <span className="text-sm font-medium" style={{ color: '#1A1814' }}>Montando carrinho…</span>
+              </div>
+            )}
+
+            {pedidoStatus === 'reauth' && (
+              <div className="space-y-2">
+                <p className="text-sm font-semibold" style={{ color: '#1A1814' }}>Login necessário</p>
+                <p className="text-xs" style={{ color: '#7A7267' }}>
+                  Uma janela do Chrome abriu. Faça login no Hortisabor e clique em Pedir novamente.
+                </p>
+                <button
+                  onClick={() => setPedidoStatus(null)}
+                  className="text-xs font-medium"
+                  style={{ color: '#7A7267' }}
+                >
+                  Fechar
+                </button>
+              </div>
+            )}
+
+            {pedidoStatus === 'error' && (
+              <div className="space-y-2">
+                <p className="text-sm font-semibold" style={{ color: '#B91C1C' }}>Serviço não encontrado</p>
+                <p className="text-xs" style={{ color: '#7A7267' }}>Verifique se iniciar.bat está rodando.</p>
+                <button
+                  onClick={() => setPedidoStatus(null)}
+                  className="text-xs font-medium"
+                  style={{ color: '#7A7267' }}
+                >
+                  Fechar
+                </button>
+              </div>
+            )}
+
+            {pedidoStatus !== null && typeof pedidoStatus === 'object' && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold" style={{ color: '#1A1814' }}>Carrinho pronto!</p>
+                  <button
+                    onClick={() => setPedidoStatus(null)}
+                    className="text-xs font-medium"
+                    style={{ color: '#7A7267' }}
+                  >
+                    Fechar
+                  </button>
+                </div>
+                <a
+                  href={pedidoStatus.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold text-white"
+                  style={{ backgroundColor: '#2D6A4F' }}
+                >
+                  🛒 Abrir carrinho no Hortisabor
+                </a>
+                {pedidoStatus.nao_encontrados.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold mb-1" style={{ color: '#7A7267' }}>
+                      Não encontrados ({pedidoStatus.nao_encontrados.length}):
+                    </p>
+                    <p className="text-xs" style={{ color: '#B0AA9F' }}>
+                      {pedidoStatus.nao_encontrados.join(', ')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       <FeedbackModal />
