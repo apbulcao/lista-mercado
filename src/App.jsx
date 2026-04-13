@@ -58,9 +58,14 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    fetch('http://localhost:7430/status')
-      .then(r => { if (r.ok) setBotOnline(true) })
-      .catch(() => {})
+    function checarBot() {
+      fetch('http://localhost:7430/status')
+        .then(r => setBotOnline(r.ok))
+        .catch(() => setBotOnline(false))
+    }
+    checarBot()
+    const intervalo = setInterval(checarBot, 5000)
+    return () => clearInterval(intervalo)
   }, [])
 
   function handleToggle(id) {
