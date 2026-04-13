@@ -123,22 +123,80 @@ async def _finalizar_reauth():
 
 
 async def _extrair_nomes_produtos(page) -> list[str]:
-    """Extrai nomes dos produtos visíveis com botão Adicionar."""
-    return await page.evaluate("""() => {
+    """Extrai nomes dos produtos visíveis com botão Adicionar.
+
+    Usa três estratégias em cascata:
+    1. Heading tags (h2/h3/h4) dentro do card
+    2. Elementos com 'name', 'title' ou 'product' no class
+    3. Primeira linha de texto do card que não seja preço/número
+    """
+    await page.screenshot(path='debug_search.png')
+
+    resultado = await page.evaluate("""() => {
         const btns = [...document.querySelectorAll('button')]
             .filter(b => b.innerText.trim() === 'Adicionar');
-        return btns.slice(0, 8).map((btn, i) => {
+
+        // Debug: HTML do primeiro card para diagnóstico
+        const card0 = btns.length > 0
+            ? (btns[0].closest('[class]') || btns[0].parentElement)
+                ?.outerHTML?.substring(0, 600) || ''
+            : 'sem botoes Adicionar';
+
+        const isNomeLinha = (l) => {
+            if (l.length <= 4) return false;
+            if (/^r\\$/i.test(l)) return false;          // preços R$
+            if (/^\\d+([,.]\\d+)?\\s*(kg|g|ml|l|un)?$/i.test(l)) return false;  // pesos/qtd
+            if (l.toLowerCase() === 'adicionar') return false;
+            return true;
+        };
+
+        const nomes = btns.slice(0, 8).map((btn, i) => {
             let el = btn.parentElement;
-            for (let j = 0; j < 6; j++) {
+
+            for (let j = 0; j < 10; j++) {
                 if (!el) break;
-                const lines = el.innerText.trim().split('\\n')
-                    .map(l => l.trim()).filter(l => l.length > 3);
-                if (lines.length >= 2) return lines[0];
+
+                // Estratégia 1: heading tags
+                for (const tag of ['h2', 'h3', 'h4', 'h5']) {
+                    const h = el.querySelector(tag);
+                    if (h) {
+                        const txt = h.innerText.trim();
+                        if (txt.length > 4) return txt.split('\\n')[0].trim();
+                    }
+                }
+
+                // Estratégia 2: classe com fragmento de nome
+                for (const frag of ['name', 'title', 'product', 'descri', 'label']) {
+                    const found = el.querySelector(`[class*="${frag}"]`);
+                    if (found && !found.contains(btn) && found !== btn) {
+                        const txt = found.innerText.trim();
+                        if (txt.length > 4 && txt.toLowerCase() !== 'adicionar')
+                            return txt.split('\\n')[0].trim();
+                    }
+                }
+
                 el = el.parentElement;
             }
+
+            // Estratégia 3: primeira linha de texto válida subindo o DOM
+            el = btn.parentElement;
+            for (let j = 0; j < 8; j++) {
+                if (!el) break;
+                const lines = el.innerText.trim().split('\\n')
+                    .map(l => l.trim())
+                    .filter(isNomeLinha);
+                if (lines.length >= 1) return lines[0];
+                el = el.parentElement;
+            }
+
             return `Produto ${i + 1}`;
         });
+
+        return { card0, nomes };
     }""")
+
+    print(f'[bot] HTML primeiro card: {resultado["card0"][:400]}')
+    return resultado['nomes']
 
 
 async def _escolher_produto_ia(nomes: list[str], termo: str, provider: str, api_key: str, api_url: str) -> Optional[int]:
@@ -190,9 +248,33 @@ async def _escolher_produto_ia(nomes: list[str], termo: str, provider: str, api_
         return 0
 
 
+async def _fechar_modal_se_visivel(page) -> None:
+    """Fecha qualquer modal VIP aberto que esteja bloqueando a UI."""
+    try:
+        modal = page.locator('.vip-modal.show').first
+        if not await modal.is_visible(timeout=500):
+            return
+        print('[bot] Modal detectado — fechando')
+        await page.keyboard.press('Escape')
+        await page.wait_for_timeout(600)
+        if not await modal.is_visible(timeout=400):
+            return
+        # Escape não funcionou: tenta botão de fechar dentro do modal
+        for sel in ['button[aria-label*="echar"]', 'button[aria-label*="lose"]',
+                    '[class*="close"]', '[class*="fechar"]']:
+            btn = page.locator(f'.vip-modal {sel}').first
+            if await btn.is_visible(timeout=300):
+                await btn.click()
+                await page.wait_for_timeout(500)
+                return
+    except Exception:
+        pass
+
+
 async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) -> bool:
     """Busca um item e adiciona ao carrinho. Retorna True se encontrado."""
     try:
+        await _fechar_modal_se_visivel(page)
         campo_busca = page.locator(SEL_BUSCA)
         await campo_busca.click()
         await campo_busca.fill('')
@@ -232,6 +314,7 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
 
         await btn_escolhido.click()
         await page.wait_for_timeout(1500)
+        await _fechar_modal_se_visivel(page)
         return True
 
     except Exception as e:
