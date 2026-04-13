@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from typing import Optional
 import httpx
@@ -27,6 +28,11 @@ class MontagemRequest(BaseModel):
     ai_provider: str = ''   # groq | openrouter | gemini | custom
     ai_api_key: str = ''
     ai_url: str = ''        # usado apenas com provider 'custom'
+
+
+class FornecerUrlRequest(BaseModel):
+    item_id: str
+    url: str
 
 
 # ---------------------------------------------------------------------------
@@ -508,6 +514,16 @@ async def status():
             'nao_encontrados': _montagem.nao_encontrados,
         },
     }
+
+
+@app.post('/fornecer-url')
+async def fornecer_url(req: FornecerUrlRequest):
+    if _montagem.estado != 'aguardando_url':
+        raise HTTPException(status_code=400, detail='Bot não está aguardando URL')
+    _montagem._url_fornecida = req.url
+    if _montagem._url_event:
+        _montagem._url_event.set()
+    return {'status': 'ok'}
 
 
 @app.post('/iniciar-montagem')

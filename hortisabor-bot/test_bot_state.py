@@ -56,3 +56,30 @@ def test_status_retorna_montagem():
     assert data["ok"] is True
     assert "montagem" in data
     assert data["montagem"]["estado"] == "idle"
+
+
+def test_fornecer_url_resume_quando_aguardando(monkeypatch):
+    reset_state()
+    _montagem.estado = "aguardando_url"
+    _montagem._url_event = asyncio.Event()
+
+    res = client.post("/fornecer-url", json={"item_id": "banana", "url": "https://hortisabor.com.br/banana"})
+    assert res.status_code == 200
+    assert res.json()["status"] == "ok"
+    assert _montagem._url_fornecida == "https://hortisabor.com.br/banana"
+    assert _montagem._url_event.is_set()
+
+
+def test_status_exposto_durante_aguardando_url():
+    reset_state()
+    _montagem.estado = "aguardando_url"
+    _montagem.item_atual = "banana prata"
+    _montagem.item_id = "bananas-prata"
+    _montagem.progresso = {"feitos": 2, "total": 10}
+
+    res = client.get("/status")
+    data = res.json()
+    assert data["montagem"]["estado"] == "aguardando_url"
+    assert data["montagem"]["item_atual"] == "banana prata"
+    assert data["montagem"]["item_id"] == "bananas-prata"
+    assert data["montagem"]["progresso"]["feitos"] == 2
