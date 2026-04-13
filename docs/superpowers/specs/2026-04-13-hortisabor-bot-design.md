@@ -149,6 +149,11 @@ FastAPI configurado para aceitar requisições de `https://apbulcao.github.io` (
 
 ---
 
+## Restrições obrigatórias
+
+- A funcionalidade de exportação para WhatsApp **permanece inalterada** — o bot é aditivo, não substitui nada existente
+- O botão "Pedir no Hortisabor" coexiste com os controles atuais da `BarraAcoes.jsx`
+
 ## Fora do escopo
 
 - Finalização automática do pedido (pagamento)
