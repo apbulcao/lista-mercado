@@ -14,7 +14,7 @@ import CategoriaCard from './components/CategoriaCard'
 import BarraAcoes from './components/BarraAcoes'
 import AdicionarItemNovo from './components/AdicionarItemNovo'
 import Historico from './components/Historico'
-import ConfigToken, { getToken, getRepo } from './components/ConfigToken'
+import ConfigToken, { getToken, getRepo, getAiProvider, getAiApiKey, getAiUrl } from './components/ConfigToken'
 import WelcomeHeader from './components/WelcomeHeader'
 import SmartInput from './components/SmartInput'
 import FeedbackModal from './components/FeedbackModal'
@@ -286,14 +286,17 @@ export default function App() {
       const res = await fetch('http://localhost:7430/montar-carrinho', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(
-          checkedItens.map(i => ({
+        body: JSON.stringify({
+          itens: checkedItens.map(i => ({
             nome: i.nome,
             quantidade: i.quantidade,
             marca: i.marca || '',
             detalhes: i.detalhes || '',
-          }))
-        ),
+          })),
+          ai_provider: getAiProvider(),
+          ai_api_key: getAiApiKey(),
+          ai_url: getAiUrl(),
+        }),
       })
 
       const data = await res.json()
@@ -541,7 +544,7 @@ export default function App() {
             {pedidoStatus === 'error' && (
               <div className="space-y-2">
                 <p className="text-sm font-semibold" style={{ color: '#B91C1C' }}>Serviço não encontrado</p>
-                <p className="text-xs" style={{ color: '#7A7267' }}>Verifique se iniciar.bat está rodando.</p>
+                <p className="text-xs" style={{ color: '#7A7267' }}>Abra iniciar.command (Mac) ou iniciar.bat (Windows).</p>
                 <button
                   onClick={() => setPedidoStatus(null)}
                   className="text-xs font-medium"
