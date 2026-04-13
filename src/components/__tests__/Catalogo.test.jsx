@@ -43,4 +43,19 @@ describe('Catalogo', () => {
     fireEvent.click(screen.getByRole('button', { name: /Salvar/i }))
     expect(onUrlChange).toHaveBeenCalledWith('banana', 'https://hortisabor.com.br/banana')
   })
+
+  it('pressionar Escape fecha o campo de edição', () => {
+    render(<Catalogo catalogo={catalogo} onUrlChange={() => {}} />)
+    fireEvent.click(screen.getByText('banana prata'))
+    fireEvent.keyDown(screen.getByPlaceholderText(/Cole o link/i), { key: 'Escape' })
+    expect(screen.queryByPlaceholderText(/Cole o link/i)).not.toBeInTheDocument()
+  })
+
+  it('exibe mensagem quando todos os itens têm URL', () => {
+    const catalogoCompleto = [
+      { id: 'cebola', nome: 'cebola nacional', categoria: 'legumes', urlHortisabor: 'https://hortisabor.com.br/cebola' },
+    ]
+    render(<Catalogo catalogo={catalogoCompleto} onUrlChange={() => {}} />)
+    expect(screen.getByText('Todos os itens mapeados!')).toBeInTheDocument()
+  })
 })

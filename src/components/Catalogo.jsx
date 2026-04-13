@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function Catalogo({ catalogo, onUrlChange }) {
+export default function Catalogo({ catalogo = [], onUrlChange }) {
   const [editandoId, setEditandoId] = useState(null)
   const [urlInput, setUrlInput] = useState('')
 
