@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   carregarDados,
   salvarDados,
@@ -18,6 +18,8 @@ import ConfigToken, { getToken, getRepo, getAiProvider, getAiApiKey, getAiUrl } 
 import WelcomeHeader from './components/WelcomeHeader'
 import SmartInput from './components/SmartInput'
 import FeedbackModal from './components/FeedbackModal'
+import Catalogo from './components/Catalogo'
+import PausaModal from './components/PausaModal'
 
 export default function App() {
   const [dados, setDados] = useState(null)
@@ -29,6 +31,7 @@ export default function App() {
   const [botOnline, setBotOnline] = useState(false)
   const [pedidoStatus, setPedidoStatus] = useState(null)
   // pedidoStatus: null | 'loading' | 'reauth' | 'error' | { url, encontrados, nao_encontrados }
+  const pollingRef = useRef(null)
 
   async function carregarApp() {
     setLoading(true)
@@ -108,7 +111,7 @@ export default function App() {
     ])
   }
 
-  function handleAdicionarNovo(nome, categoria) {
+  function handleAdicionarNovo(nome, categoria, urlHortisabor = '') {
     const slugBase = slugifyNomeItem(nome)
     if (!slugBase) {
       alert('Digite um nome de item valido.')
@@ -138,6 +141,7 @@ export default function App() {
       detalhes: '',
       marca: '',
       score: 0,
+      urlHortisabor: urlHortisabor || '',
     }
     setDados((prev) => ({
       ...prev,
@@ -297,11 +301,12 @@ export default function App() {
     setPedidoStatus('loading')
 
     try {
-      const res = await fetch('http://localhost:7430/montar-carrinho', {
+      const res = await fetch('http://localhost:7430/iniciar-montagem', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          itens: checkedItens.map(i => ({
+          itens: checkedItens.map((i) => ({
+            id: i.id,
             nome: i.nome,
             quantidade: i.quantidade,
             marca: i.marca || '',
@@ -318,14 +323,57 @@ export default function App() {
 
       if (data.status === 'reauth_needed') {
         setPedidoStatus('reauth')
-      } else if (data.status === 'ok') {
-        setPedidoStatus({ url: data.url_carrinho, encontrados: data.encontrados, nao_encontrados: data.nao_encontrados })
-      } else {
-        setPedidoStatus('error')
+        return
       }
+
+      // Iniciar polling
+      pollingRef.current = setInterval(async () => {
+        try {
+          const statusRes = await fetch('http://localhost:7430/status')
+          const statusData = await statusRes.json()
+          const montagem = statusData.montagem
+
+          if (montagem.estado === 'concluido') {
+            clearInterval(pollingRef.current)
+            setPedidoStatus({
+              url: 'https://www.delivery.hortisabor.com.br/carrinho/',
+              encontrados: montagem.encontrados,
+              nao_encontrados: montagem.nao_encontrados,
+            })
+          } else if (montagem.estado === 'aguardando_url') {
+            setPedidoStatus(montagem)
+          } else if (montagem.estado === 'erro') {
+            clearInterval(pollingRef.current)
+            setPedidoStatus('error')
+          }
+        } catch {
+          clearInterval(pollingRef.current)
+          setPedidoStatus('error')
+        }
+      }, 1000)
+
     } catch {
       setPedidoStatus('error')
     }
+  }
+
+  async function handleFornecerUrl(itemId, url) {
+    await handleUrlHortisaborChange(itemId, url)
+    await fetch('http://localhost:7430/fornecer-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ item_id: itemId, url }),
+    })
+    setPedidoStatus('loading')
+  }
+
+  async function handlePularItem() {
+    await fetch('http://localhost:7430/fornecer-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ item_id: '', url: '' }),
+    })
+    setPedidoStatus('loading')
   }
 
   if (loading) {
@@ -395,15 +443,41 @@ export default function App() {
         </h1>
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium" style={{ color: '#7A7267' }}>{diaFormatado}</span>
-          <button
-            onClick={() => setView(view === 'lista' ? 'historico' : 'lista')}
-            className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors duration-200"
-            style={{ border: '1px solid #E0D9CE', color: '#5A5449', backgroundColor: 'transparent' }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#E0D9CE'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            {view === 'lista' ? 'Histórico' : 'Voltar'}
-          </button>
+          <div className="flex gap-1">
+            <button
+              onClick={() => setView('lista')}
+              className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors duration-200"
+              style={{
+                border: '1px solid #E0D9CE',
+                color: view === 'lista' ? '#2D6A4F' : '#5A5449',
+                backgroundColor: view === 'lista' ? '#E0EDE7' : 'transparent',
+              }}
+            >
+              Lista
+            </button>
+            <button
+              onClick={() => setView('catalogo')}
+              className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors duration-200"
+              style={{
+                border: '1px solid #E0D9CE',
+                color: view === 'catalogo' ? '#2D6A4F' : '#5A5449',
+                backgroundColor: view === 'catalogo' ? '#E0EDE7' : 'transparent',
+              }}
+            >
+              Catálogo
+            </button>
+            <button
+              onClick={() => setView('historico')}
+              className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors duration-200"
+              style={{
+                border: '1px solid #E0D9CE',
+                color: view === 'historico' ? '#2D6A4F' : '#5A5449',
+                backgroundColor: view === 'historico' ? '#E0EDE7' : 'transparent',
+              }}
+            >
+              Histórico
+            </button>
+          </div>
           <button
             onClick={() => setConfigAberto(true)}
             className="text-sm px-2 py-1.5 rounded-lg transition-colors duration-200"
@@ -476,7 +550,7 @@ export default function App() {
 
         {/* Main content */}
         <main className="py-5 pb-32 space-y-3 min-w-0">
-          {view === 'lista' ? (
+          {view === 'lista' && (
             <>
               {/* Greeting mobile only */}
               <div className="md:hidden">
@@ -506,7 +580,11 @@ export default function App() {
               })}
               <AdicionarItemNovo onAdicionar={handleAdicionarNovo} />
             </>
-          ) : (
+          )}
+          {view === 'catalogo' && dados && (
+            <Catalogo catalogo={dados.catalogo} onUrlChange={handleUrlHortisaborChange} />
+          )}
+          {view === 'historico' && (
             <Historico historico={dados.historico} catalogo={dados.catalogo} />
           )}
         </main>
@@ -521,7 +599,15 @@ export default function App() {
         />
       )}
 
-      {pedidoStatus && (
+      {typeof pedidoStatus === 'object' && pedidoStatus !== null && pedidoStatus.estado === 'aguardando_url' && (
+        <PausaModal
+          estado={pedidoStatus}
+          onFornecer={handleFornecerUrl}
+          onPular={handlePularItem}
+        />
+      )}
+
+      {pedidoStatus && !(typeof pedidoStatus === 'object' && pedidoStatus !== null && pedidoStatus.estado === 'aguardando_url') && (
         <div
           className="fixed inset-0 z-30 flex items-end justify-center pb-28 px-4"
           style={{ pointerEvents: 'none' }}
@@ -574,7 +660,7 @@ export default function App() {
               </div>
             )}
 
-            {pedidoStatus !== null && typeof pedidoStatus === 'object' && (
+            {pedidoStatus !== null && typeof pedidoStatus === 'object' && pedidoStatus.url && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold" style={{ color: '#1A1814' }}>Carrinho pronto!</p>
