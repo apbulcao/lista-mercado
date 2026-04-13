@@ -16,6 +16,7 @@ export default function CategoriaCard({
   onToggle,
   onQuantidadeChange,
   onAdicionarItem,
+  onUrlChange,
 }) {
   const [dropdownAberto, setDropdownAberto] = useState(false)
   const [filtro, setFiltro] = useState('')
@@ -83,6 +84,7 @@ export default function CategoriaCard({
             item={item}
             onToggle={onToggle}
             onQuantidadeChange={onQuantidadeChange}
+            onUrlChange={onUrlChange}
           />
         ))}
       </div>

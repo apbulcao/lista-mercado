@@ -18,6 +18,7 @@ class ItemRequest(BaseModel):
     quantidade: str
     marca: str = ''
     detalhes: str = ''
+    url_hortisabor: str = ''
 
 
 class MontagemRequest(BaseModel):
@@ -275,6 +276,25 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
     """Busca um item e adiciona ao carrinho. Retorna True se encontrado."""
     try:
         await _fechar_modal_se_visivel(page)
+
+        # Navegação direta se URL do produto for conhecida
+        if item.url_hortisabor:
+            print(f'[bot] URL direta: {item.url_hortisabor}')
+            await page.goto(item.url_hortisabor, wait_until='networkidle', timeout=15000)
+            await _fechar_modal_se_visivel(page)
+            btn = page.locator('button', has_text='Adicionar').first
+            await btn.wait_for(state='visible', timeout=8000)
+            if item.quantidade and item.quantidade not in ('', '1'):
+                qtd_input = page.locator(SEL_QUANTIDADE).first
+                if await qtd_input.is_visible():
+                    await qtd_input.fill(item.quantidade)
+            await btn.click()
+            await page.wait_for_timeout(1000)
+            await _fechar_modal_se_visivel(page)
+            await page.goto(URL_HOME, wait_until='networkidle', timeout=15000)
+            await _fechar_modal_se_visivel(page)
+            return True
+
         campo_busca = page.locator(SEL_BUSCA)
         await campo_busca.click()
         await campo_busca.fill('')

@@ -8,7 +8,8 @@
       "unidade": "",
       "detalhes": "para consumo em 2 dias",
       "marca": "",
-      "score": 1
+      "score": 1,
+      "urlHortisabor": ""
     },
     {
       "id": "cebolas",
@@ -18,7 +19,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.87
+      "score": 0.87,
+      "urlHortisabor": ""
     },
     {
       "id": "iogurte-grego",
@@ -28,7 +30,8 @@
       "unidade": "",
       "detalhes": "500g, tampa azul",
       "marca": "",
-      "score": 0.91
+      "score": 0.91,
+      "urlHortisabor": ""
     },
     {
       "id": "leite-integral",
@@ -38,7 +41,8 @@
       "unidade": "litros",
       "detalhes": "",
       "marca": "Parmalat",
-      "score": 0.87
+      "score": 0.87,
+      "urlHortisabor": ""
     },
     {
       "id": "milho-sweet",
@@ -48,7 +52,8 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "",
-      "score": 0.87
+      "score": 0.87,
+      "urlHortisabor": ""
     },
     {
       "id": "morango",
@@ -58,7 +63,8 @@
       "unidade": "pacotes",
       "detalhes": "Altea se disponível",
       "marca": "",
-      "score": 0.87
+      "score": 0.87,
+      "urlHortisabor": ""
     },
     {
       "id": "alho",
@@ -68,7 +74,8 @@
       "unidade": "cabeça",
       "detalhes": "",
       "marca": "",
-      "score": 0.76
+      "score": 0.76,
+      "urlHortisabor": ""
     },
     {
       "id": "file-peito-frango",
@@ -78,7 +85,8 @@
       "unidade": "kg",
       "detalhes": "",
       "marca": "Korin",
-      "score": 0.78
+      "score": 0.78,
+      "urlHortisabor": ""
     },
     {
       "id": "limoes-tahity",
@@ -88,7 +96,8 @@
       "unidade": "",
       "detalhes": "escolher com casca mais lisa",
       "marca": "",
-      "score": 0.76
+      "score": 0.76,
+      "urlHortisabor": ""
     },
     {
       "id": "maca",
@@ -98,7 +107,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.77
+      "score": 0.77,
+      "urlHortisabor": ""
     },
     {
       "id": "mamao-papaya",
@@ -108,7 +118,8 @@
       "unidade": "",
       "detalhes": "consumo em 2 dias",
       "marca": "",
-      "score": 0.78
+      "score": 0.78,
+      "urlHortisabor": ""
     },
     {
       "id": "molho-de-tomate",
@@ -118,7 +129,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.76
+      "score": 0.76,
+      "urlHortisabor": ""
     },
     {
       "id": "mucarela",
@@ -128,7 +140,8 @@
       "unidade": "bandeja",
       "detalhes": "",
       "marca": "",
-      "score": 0.78
+      "score": 0.78,
+      "urlHortisabor": ""
     },
     {
       "id": "ovos-vermelhos",
@@ -138,7 +151,8 @@
       "unidade": "caixas 20un",
       "detalhes": "",
       "marca": "Nakaura",
-      "score": 0.78
+      "score": 0.78,
+      "urlHortisabor": ""
     },
     {
       "id": "pao-de-forma",
@@ -148,7 +162,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "Panco",
-      "score": 0.78
+      "score": 0.78,
+      "urlHortisabor": ""
     },
     {
       "id": "patinho-moido",
@@ -158,7 +173,8 @@
       "unidade": "kg",
       "detalhes": "dividir em 2 bandejas",
       "marca": "",
-      "score": 0.78
+      "score": 0.78,
+      "urlHortisabor": ""
     },
     {
       "id": "alface-americana",
@@ -168,7 +184,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.69
+      "score": 0.69,
+      "urlHortisabor": ""
     },
     {
       "id": "azeite",
@@ -178,7 +195,8 @@
       "unidade": "500ml",
       "detalhes": "",
       "marca": "Borges",
-      "score": 0.28
+      "score": 0.28,
+      "urlHortisabor": ""
     },
     {
       "id": "batata-doce",
@@ -188,7 +206,8 @@
       "unidade": "bandejas",
       "detalhes": "",
       "marca": "",
-      "score": 0.3
+      "score": 0.3,
+      "urlHortisabor": ""
     },
     {
       "id": "brocolis-ninja",
@@ -198,7 +217,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.28
+      "score": 0.28,
+      "urlHortisabor": ""
     },
     {
       "id": "cenouras",
@@ -208,7 +228,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.68
+      "score": 0.68,
+      "urlHortisabor": ""
     },
     {
       "id": "melao-amarelo",
@@ -218,7 +239,8 @@
       "unidade": "pedaço",
       "detalhes": "",
       "marca": "",
-      "score": 0.32
+      "score": 0.32,
+      "urlHortisabor": ""
     },
     {
       "id": "pao-tartaruga-multigraos",
@@ -228,7 +250,8 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "",
-      "score": 0.32
+      "score": 0.32,
+      "urlHortisabor": ""
     },
     {
       "id": "peito-de-peru",
@@ -238,7 +261,8 @@
       "unidade": "pacote ~200g",
       "detalhes": "fininho",
       "marca": "Sadia",
-      "score": 0.69
+      "score": 0.69,
+      "urlHortisabor": ""
     },
     {
       "id": "rucula-baby",
@@ -248,7 +272,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.69
+      "score": 0.69,
+      "urlHortisabor": ""
     },
     {
       "id": "tomatinho-cereja",
@@ -258,7 +283,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.69
+      "score": 0.69,
+      "urlHortisabor": ""
     },
     {
       "id": "abobora-cabotia",
@@ -268,7 +294,8 @@
       "unidade": "pedaço",
       "detalhes": "",
       "marca": "",
-      "score": 0.23
+      "score": 0.23,
+      "urlHortisabor": ""
     },
     {
       "id": "abobrinhas",
@@ -278,7 +305,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.24
+      "score": 0.24,
+      "urlHortisabor": ""
     },
     {
       "id": "arroz-cateto",
@@ -288,7 +316,8 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "Camil",
-      "score": 0.22
+      "score": 0.22,
+      "urlHortisabor": ""
     },
     {
       "id": "batatas-inglesas",
@@ -298,7 +327,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.24
+      "score": 0.24,
+      "urlHortisabor": ""
     },
     {
       "id": "biscoito-mae-terra-coco",
@@ -308,7 +338,8 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "",
-      "score": 0.27
+      "score": 0.27,
+      "urlHortisabor": ""
     },
     {
       "id": "couve-flor",
@@ -318,7 +349,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.19
+      "score": 0.19,
+      "urlHortisabor": ""
     },
     {
       "id": "quiabo",
@@ -328,7 +360,8 @@
       "unidade": "bandejas",
       "detalhes": "",
       "marca": "",
-      "score": 0.24
+      "score": 0.24,
+      "urlHortisabor": ""
     },
     {
       "id": "agua-de-coco",
@@ -338,7 +371,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.14
+      "score": 0.14,
+      "urlHortisabor": ""
     },
     {
       "id": "avocado",
@@ -348,7 +382,8 @@
       "unidade": "",
       "detalhes": "maduros",
       "marca": "",
-      "score": 0.14
+      "score": 0.14,
+      "urlHortisabor": ""
     },
     {
       "id": "berinjelas",
@@ -358,7 +393,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.12
+      "score": 0.12,
+      "urlHortisabor": ""
     },
     {
       "id": "beterraba",
@@ -368,7 +404,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.09
+      "score": 0.09,
+      "urlHortisabor": ""
     },
     {
       "id": "biscoito-lev",
@@ -378,7 +415,8 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "",
-      "score": 0.13
+      "score": 0.13,
+      "urlHortisabor": ""
     },
     {
       "id": "biscoito-mae-terra-maizena",
@@ -388,7 +426,8 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "Mãe Terra",
-      "score": 0.13
+      "score": 0.13,
+      "urlHortisabor": ""
     },
     {
       "id": "bisnaguinha",
@@ -398,7 +437,8 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "Panco",
-      "score": 0.12
+      "score": 0.12,
+      "urlHortisabor": ""
     },
     {
       "id": "chuchus",
@@ -408,7 +448,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.08
+      "score": 0.08,
+      "urlHortisabor": ""
     },
     {
       "id": "cottagy-yorgus",
@@ -418,7 +459,8 @@
       "unidade": "pote grande",
       "detalhes": "",
       "marca": "Yorgus",
-      "score": 0.08
+      "score": 0.08,
+      "urlHortisabor": ""
     },
     {
       "id": "couve-manteiga",
@@ -428,7 +470,8 @@
       "unidade": "maço",
       "detalhes": "",
       "marca": "",
-      "score": 0.14
+      "score": 0.14,
+      "urlHortisabor": ""
     },
     {
       "id": "ervilha-torta",
@@ -438,7 +481,8 @@
       "unidade": "bandejas",
       "detalhes": "",
       "marca": "",
-      "score": 0.12
+      "score": 0.12,
+      "urlHortisabor": ""
     },
     {
       "id": "espinafre",
@@ -448,7 +492,8 @@
       "unidade": "maço",
       "detalhes": "",
       "marca": "",
-      "score": 0.12
+      "score": 0.12,
+      "urlHortisabor": ""
     },
     {
       "id": "feijao-preto",
@@ -458,7 +503,8 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "",
-      "score": 0.13
+      "score": 0.13,
+      "urlHortisabor": ""
     },
     {
       "id": "feijao-vermelho",
@@ -468,7 +514,8 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "",
-      "score": 0.09
+      "score": 0.09,
+      "urlHortisabor": ""
     },
     {
       "id": "file-tilapia",
@@ -478,7 +525,8 @@
       "unidade": "bandeja",
       "detalhes": "",
       "marca": "",
-      "score": 0.08
+      "score": 0.08,
+      "urlHortisabor": ""
     },
     {
       "id": "granola-keto",
@@ -488,7 +536,8 @@
       "unidade": "pacote",
       "detalhes": "pacote verde",
       "marca": "Harts",
-      "score": 0.14
+      "score": 0.14,
+      "urlHortisabor": ""
     },
     {
       "id": "kiwi",
@@ -498,7 +547,8 @@
       "unidade": "",
       "detalhes": "maduros",
       "marca": "",
-      "score": 0.12
+      "score": 0.12,
+      "urlHortisabor": ""
     },
     {
       "id": "lombinho-suino",
@@ -508,7 +558,8 @@
       "unidade": "pacote ~500g",
       "detalhes": "",
       "marca": "",
-      "score": 0.1
+      "score": 0.1,
+      "urlHortisabor": ""
     },
     {
       "id": "penne-de-cecco",
@@ -518,7 +569,8 @@
       "unidade": "pacote",
       "detalhes": "",
       "marca": "De Cecco",
-      "score": 0.08
+      "score": 0.08,
+      "urlHortisabor": ""
     },
     {
       "id": "presunto-parma",
@@ -528,7 +580,8 @@
       "unidade": "pacote ~150g",
       "detalhes": "fininho",
       "marca": "",
-      "score": 0.12
+      "score": 0.12,
+      "urlHortisabor": ""
     },
     {
       "id": "queijo-cabra-cablanca",
@@ -538,7 +591,8 @@
       "unidade": "pedaço",
       "detalhes": "",
       "marca": "Cablanca",
-      "score": 0.12
+      "score": 0.12,
+      "urlHortisabor": ""
     },
     {
       "id": "queijo-cabra-fresco",
@@ -548,7 +602,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.12
+      "score": 0.12,
+      "urlHortisabor": ""
     },
     {
       "id": "requeijao",
@@ -558,7 +613,8 @@
       "unidade": "pote grande",
       "detalhes": "",
       "marca": "Tirolez",
-      "score": 0.14
+      "score": 0.14,
+      "urlHortisabor": ""
     },
     {
       "id": "sobrecoxa",
@@ -568,7 +624,8 @@
       "unidade": "kg",
       "detalhes": "",
       "marca": "",
-      "score": 0.14
+      "score": 0.14,
+      "urlHortisabor": ""
     },
     {
       "id": "suco-laranja",
@@ -578,7 +635,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "Xandô",
-      "score": 0.14
+      "score": 0.14,
+      "urlHortisabor": ""
     },
     {
       "id": "suco-uva",
@@ -588,7 +646,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "Aurora",
-      "score": 0.14
+      "score": 0.14,
+      "urlHortisabor": ""
     },
     {
       "id": "uva-verde",
@@ -598,7 +657,8 @@
       "unidade": "",
       "detalhes": "",
       "marca": "",
-      "score": 0.12
+      "score": 0.12,
+      "urlHortisabor": ""
     },
     {
       "id": "vagem-francesa",
@@ -608,7 +668,8 @@
       "unidade": "bandejas",
       "detalhes": "",
       "marca": "",
-      "score": 0.1
+      "score": 0.1,
+      "urlHortisabor": ""
     }
   ],
   "historico": [

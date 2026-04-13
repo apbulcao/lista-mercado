@@ -84,6 +84,20 @@ export default function App() {
     )
   }
 
+  async function handleUrlHortisaborChange(itemId, url) {
+    const novoCatalogo = dados.catalogo.map((c) =>
+      c.id === itemId ? { ...c, urlHortisabor: url } : c
+    )
+    const novosDados = { catalogo: novoCatalogo, historico: dados.historico }
+    setDados(novosDados)
+    setListaAtual((prev) => prev.map((i) => i.id === itemId ? { ...i, urlHortisabor: url } : i))
+    const token = getToken()
+    const repo = getRepo()
+    if (token && repo) {
+      try { await salvarDados(novosDados, token, repo) } catch (_) {}
+    }
+  }
+
   function handleAdicionarDoCatalogo(catalogoId) {
     const itemCatalogo = dados.catalogo.find((c) => c.id === catalogoId)
     if (!itemCatalogo) return
@@ -292,6 +306,7 @@ export default function App() {
             quantidade: i.quantidade,
             marca: i.marca || '',
             detalhes: i.detalhes || '',
+            url_hortisabor: i.urlHortisabor || '',
           })),
           ai_provider: getAiProvider(),
           ai_api_key: getAiApiKey(),
@@ -485,6 +500,7 @@ export default function App() {
                     onToggle={handleToggle}
                     onQuantidadeChange={handleQuantidadeChange}
                     onAdicionarItem={handleAdicionarDoCatalogo}
+                    onUrlChange={handleUrlHortisaborChange}
                   />
                 )
               })}
