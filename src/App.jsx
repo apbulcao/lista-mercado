@@ -521,7 +521,10 @@ export default function App() {
             {pedidoStatus === 'loading' && (
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 border-2 border-gray-200 border-t-[#2D6A4F] rounded-full animate-spin flex-shrink-0" />
-                <span className="text-sm font-medium" style={{ color: '#1A1814' }}>Montando carrinho…</span>
+                <div>
+                  <span className="text-sm font-medium" style={{ color: '#1A1814' }}>Montando carrinho…</span>
+                  <p className="text-xs mt-0.5" style={{ color: '#7A7267' }}>O bot está buscando cada item. Pode levar 1-2 min.</p>
+                </div>
               </div>
             )}
 
