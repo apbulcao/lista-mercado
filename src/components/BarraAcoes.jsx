@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function BarraAcoes({ onCopiar, onConfirmar }) {
+export default function BarraAcoes({ onCopiar, onConfirmar, botOnline, onPedirHortisabor }) {
   const [copiado, setCopiado] = useState(false)
 
   const handleCopiar = async () => {
@@ -45,6 +45,25 @@ export default function BarraAcoes({ onCopiar, onConfirmar }) {
         >
           {copiado ? '✓ Copiado!' : '📋 Copiar para WhatsApp'}
         </button>
+
+        {botOnline && (
+          <button
+            onClick={onPedirHortisabor}
+            className="font-semibold text-sm transition-all duration-200 active:scale-[0.97]"
+            style={{
+              backgroundColor: '#1B4332',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '100px',
+              padding: '9px 20px',
+              fontFamily: 'inherit',
+              cursor: 'pointer',
+            }}
+          >
+            🛒 Pedir no Hortisabor
+          </button>
+        )}
+
         <button
           onClick={onConfirmar}
           className="font-semibold text-sm transition-all duration-200 active:scale-[0.97]"
