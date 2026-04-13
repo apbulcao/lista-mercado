@@ -208,13 +208,15 @@ async def montar_carrinho(itens: list[ItemRequest]):
     if not cookies:
         if not _reauth.aberto():
             await _abrir_reauth()
-        return {'status': 'reauth_needed', 'mensagem': 'Faça login na janela que abriu. Depois clique em Pedir novamente.'}
-
-    if _reauth.aberto():
+            return {'status': 'reauth_needed', 'mensagem': 'Faça login na janela que abriu. Depois clique em Pedir novamente.'}
+        # Chrome está aberto — verificar se o usuário já fez login
         logado = await _verificar_login_reauth()
         if not logado:
             return {'status': 'reauth_needed', 'mensagem': 'Ainda não logado. Faça login e clique em Pedir novamente.'}
         await _finalizar_reauth()
+        cookies = carregar_cookies()  # recarrega após salvar
+        if not cookies:
+            return {'status': 'reauth_needed', 'mensagem': 'Erro ao salvar sessão. Tente novamente.'}
 
     resultado = await _executar_headless(cookies, itens)
 
