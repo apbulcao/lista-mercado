@@ -676,7 +676,8 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
         # Match por nome: slug da URL vs nome no carrinho (case-insensitive, parcial)
         slug_parts = item.url_hortisabor.rstrip('/').split('/')[-1].replace('-', ' ').lower().split() if item.url_hortisabor else []
         nome_parts = item.nome.lower().split()
-        search_terms = slug_parts if slug_parts else nome_parts
+        raw_terms = slug_parts if slug_parts else nome_parts
+        search_terms = [t for t in raw_terms if len(t) >= 4]
 
         matched_idx = None
         best_score = 0
