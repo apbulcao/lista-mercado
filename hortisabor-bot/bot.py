@@ -164,8 +164,6 @@ async def _extrair_nomes_produtos(page) -> list[str]:
     2. Elementos com 'name', 'title' ou 'product' no class
     3. Primeira linha de texto do card que não seja preço/número
     """
-    await page.screenshot(path='debug_search.png')
-
     resultado = await page.evaluate("""() => {
         const btns = [...document.querySelectorAll('button')]
             .filter(b => b.innerText.trim() === 'Adicionar');
@@ -479,8 +477,6 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
 
             n_btns = await page.locator('button', has_text='Adicionar').count()
             print(f'[bot] Botões "Adicionar" encontrados: {n_btns}')
-            slug = item.url_hortisabor.rstrip('/').split('/')[-1][:40]
-            await page.screenshot(path=f'debug_{slug}_antes.png')
 
             if n_btns == 0:
                 print(f'[bot] AVISO: nenhum botão Adicionar — produto indisponível?')
@@ -493,17 +489,12 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
 
             # O site exige seleção de entrega/loja antes de confirmar a adição.
             # Sem confirmar, o item NÃO entra no carrinho.
-            # Usa Playwright locators (clique real) em vez de JS evaluate
-            # porque element.click() não dispara handlers React do site.
             await page.wait_for_timeout(1500)
             confirmou = await _confirmar_modal_entrega(page)
             if confirmou:
                 print(f'[bot] Modal de entrega: {confirmou}')
             else:
-                await page.screenshot(path=f'debug_{slug}_modal_falhou.png')
                 print('[bot] AVISO: modal de entrega não confirmado')
-
-            await page.screenshot(path=f'debug_{slug}_depois.png')
 
             # Navega de volta ao home
             await page.goto(URL_HOME, wait_until='domcontentloaded', timeout=15000)
@@ -815,7 +806,6 @@ async def _executar_headless(cookies, itens: list[ItemRequest], ai_config: dict)
             return None
 
         await _fechar_modal_entrega(page)
-        await page.screenshot(path='debug_home.png')
         print(f'[bot] Home carregada. URL: {page.url}')
 
         for item in itens:

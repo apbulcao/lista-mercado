@@ -96,13 +96,7 @@ export default function ListaItem({ item, onToggle, onQuantidadeChange, onUrlCha
         <div className="flex flex-col min-w-0 flex-1">
           <span className="text-sm font-semibold" style={{ color: checked ? '#1A1814' : '#A09890', textDecoration: checked ? 'none' : 'line-through', textDecorationColor: '#C5BAB0' }}>
             {nome}
-            {unidade && <span className="font-normal ml-1" style={{ color: '#B0AA9F', fontSize: '0.65rem' }}>{unidade}</span>}
           </span>
-          {(detalhes || marca) && (
-            <span className="truncate" style={{ fontSize: '0.63rem', color: '#B0AA9F' }}>
-              {[detalhes, marca].filter(Boolean).join(' · ')}
-            </span>
-          )}
           {temObs && !editandoObs && (
             <span className="truncate" style={{ fontSize: '0.63rem', color: '#7A7267', fontStyle: 'italic' }}>
               📝 {observacoes}

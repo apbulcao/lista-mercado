@@ -28,9 +28,8 @@ export function criarIdItem(nome, itensExistentes = []) {
 }
 
 export function normalizarQuantidade(valor) {
-  const apenasDigitos = String(valor ?? '').replace(/\D/g, '')
-  if (!apenasDigitos) return ''
-  return apenasDigitos.replace(/^0+(?=\d)/, '')
+  const match = String(valor ?? '').match(/[1-9]\d*/)
+  return match ? match[0] : ''
 }
 
 export function quantidadeValida(valor) {
