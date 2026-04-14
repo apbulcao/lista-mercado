@@ -14,6 +14,7 @@ import BarraAcoes from './components/BarraAcoes'
 import AdicionarItemNovo from './components/AdicionarItemNovo'
 import Historico from './components/Historico'
 import ConfigToken, { getToken, getRepo, getAiProvider, getAiApiKey, getAiUrl } from './components/ConfigToken'
+import { botFetch } from './lib/botApi'
 import WelcomeHeader from './components/WelcomeHeader'
 import SmartInput from './components/SmartInput'
 import FeedbackModal from './components/FeedbackModal'
@@ -79,7 +80,7 @@ export default function App() {
 
   useEffect(() => {
     function checarBot() {
-      fetch('http://localhost:7430/status')
+      botFetch('/status')
         .then(r => setBotOnline(r.ok))
         .catch(() => setBotOnline(false))
     }
@@ -338,7 +339,7 @@ export default function App() {
     setPedidoStatus('loading')
 
     try {
-      const res = await fetch('http://localhost:7430/iniciar-montagem', {
+      const res = await botFetch('/iniciar-montagem', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -368,7 +369,7 @@ export default function App() {
       if (pollingRef.current) clearInterval(pollingRef.current)
       pollingRef.current = setInterval(async () => {
         try {
-          const statusRes = await fetch('http://localhost:7430/status')
+          const statusRes = await botFetch('/status')
           const statusData = await statusRes.json()
           const montagem = statusData.montagem
 
@@ -399,7 +400,7 @@ export default function App() {
   async function handleFornecerUrl(itemId, url) {
     try {
       await handleUrlHortisaborChange(itemId, url)
-      await fetch('http://localhost:7430/fornecer-url', {
+      await botFetch('/fornecer-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ item_id: itemId, url }),
@@ -412,7 +413,7 @@ export default function App() {
 
   async function handlePularItem() {
     try {
-      await fetch('http://localhost:7430/fornecer-url', {
+      await botFetch('/fornecer-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ item_id: '', url: '' }),
