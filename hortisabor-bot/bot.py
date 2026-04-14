@@ -780,30 +780,56 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
         # --- Observação ---
         if obs:
             try:
-                # Clica em "Adicionar Observação" do item correspondente
-                obs_links = page.get_by_text('Adicionar Observação')
-                obs_link = obs_links.nth(spinner_idx)
-                await obs_link.click(timeout=3000)
-                await page.wait_for_timeout(500)
+                # Encontra o container do item a partir do spinner,
+                # depois busca o link de observação DENTRO desse container.
+                # Isso evita desalinhamento de índices (nem todo item tem o link).
+                obs_link = await page.evaluate("""(idx) => {
+                    const spinners = [...document.querySelectorAll('input.vip-spin__quantity')]
+                        .filter(el => el.offsetParent !== null);
+                    if (idx >= spinners.length) return null;
+                    let container = spinners[idx].parentElement;
+                    for (let j = 0; j < 10 && container; j++) {
+                        const link = container.querySelector(
+                            '[class*="observa"], [class*="Observa"]'
+                        );
+                        const textLink = [...container.querySelectorAll('a, button, span, div')]
+                            .find(el => /observa/i.test(el.innerText) && el.innerText.length < 50);
+                        if (link || textLink) {
+                            const el = link || textLink;
+                            return {found: true, tag: el.tagName, text: el.innerText.substring(0, 50)};
+                        }
+                        container = container.parentElement;
+                    }
+                    return {found: false};
+                }""", spinner_idx)
 
-                # Digita a observação no campo que aparece
-                obs_input = page.locator('textarea:visible, input[placeholder*="bserva"]:visible').last
-                await obs_input.fill(obs)
-                await page.wait_for_timeout(300)
+                if not obs_link or not obs_link.get('found'):
+                    print(f'[bot] Carrinho: "{item.nome}" → sem botão de observação')
+                else:
+                    # Clica no link de observação via locator relativo ao spinner
+                    spinner_loc = page.locator('input.vip-spin__quantity:visible').nth(spinner_idx)
+                    # Sobe ao container e clica no elemento com texto "observa"
+                    obs_btn = spinner_loc.locator('xpath=ancestor::*[.//descendant-or-self::*[contains(translate(text(),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"observa")]][1]//descendant-or-self::*[contains(translate(text(),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"observa")]').first
+                    await obs_btn.click(timeout=3000)
+                    await page.wait_for_timeout(500)
 
-                # Tenta confirmar (botão OK/Salvar/Confirmar)
-                confirm_btn = page.locator('button:visible', has_text='OK').or_(
-                    page.locator('button:visible', has_text='Salvar')
-                ).or_(
-                    page.locator('button:visible', has_text='Confirmar')
-                ).first
-                try:
-                    await confirm_btn.click(timeout=2000)
-                except Exception:
-                    # Se não tem botão, a observação pode salvar ao perder foco
-                    await obs_input.press('Enter')
+                    # Digita a observação no campo que aparece
+                    obs_input = page.locator('textarea:visible, input[placeholder*="bserva"]:visible').last
+                    await obs_input.fill(obs)
+                    await page.wait_for_timeout(300)
 
-                print(f'[bot] Carrinho: "{item.nome}" → obs: "{obs}"')
+                    # Tenta confirmar
+                    confirm_btn = page.locator('button:visible', has_text='OK').or_(
+                        page.locator('button:visible', has_text='Salvar')
+                    ).or_(
+                        page.locator('button:visible', has_text='Confirmar')
+                    ).first
+                    try:
+                        await confirm_btn.click(timeout=2000)
+                    except Exception:
+                        await obs_input.press('Enter')
+
+                    print(f'[bot] Carrinho: "{item.nome}" → obs: "{obs}"')
                 await page.wait_for_timeout(300)
             except Exception as e:
                 print(f'[bot] Carrinho: falhou obs para "{item.nome}": {e}')
