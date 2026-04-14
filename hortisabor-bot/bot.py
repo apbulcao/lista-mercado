@@ -5,9 +5,10 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from playwright.async_api import async_playwright, Browser, BrowserContext, Page, Playwright
+from playwright.async_api import async_playwright
 
 from auth import ApiKeyMiddleware
+from login import login_programatico
 from session import carregar_cookies, salvar_cookies, limpar_cookies
 
 
@@ -35,32 +36,6 @@ class MontagemRequest(BaseModel):
 class FornecerUrlRequest(BaseModel):
     item_id: str
     url: str
-
-
-# ---------------------------------------------------------------------------
-# Reauth state
-# ---------------------------------------------------------------------------
-
-class _ReauthState:
-    playwright: Optional[Playwright] = None
-    browser: Optional[Browser] = None
-    context: Optional[BrowserContext] = None
-    page: Optional[Page] = None
-
-    def aberto(self) -> bool:
-        if self.browser is None:
-            return False
-        if not self.browser.is_connected():
-            # Browser foi fechado externamente — limpa estado sem tentar fechar
-            self.playwright = None
-            self.browser = None
-            self.context = None
-            self.page = None
-            return False
-        return True
-
-
-_reauth = _ReauthState()
 
 
 class _MontagemState:
@@ -94,10 +69,6 @@ _montagem = _MontagemState()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
-    if _reauth.browser:
-        await _reauth.browser.close()
-    if _reauth.playwright:
-        await _reauth.playwright.stop()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -124,38 +95,6 @@ SEL_QUANTIDADE = 'input.vip-spin__quantity'
 URL_HOME = 'https://www.delivery.hortisabor.com.br/'
 URL_LOGIN = 'https://www.delivery.hortisabor.com.br/login/'
 URL_CARRINHO = 'https://www.delivery.hortisabor.com.br/carrinho/'
-
-
-async def _abrir_reauth():
-    """Abre Chrome visível na página de login do Hortisabor."""
-    pw = await async_playwright().start()
-    browser = await pw.chromium.launch(headless=False)
-    context = await browser.new_context()
-    page = await context.new_page()
-    await page.goto(URL_LOGIN)
-    _reauth.playwright = pw
-    _reauth.browser = browser
-    _reauth.context = context
-    _reauth.page = page
-
-
-async def _verificar_login_reauth() -> bool:
-    """Retorna True se o usuário já fez login no browser visível."""
-    if not _reauth.page:
-        return False
-    return '/login/' not in _reauth.page.url
-
-
-async def _finalizar_reauth():
-    """Salva cookies do browser visível e o fecha."""
-    cookies = await _reauth.context.cookies()
-    salvar_cookies(cookies)
-    await _reauth.browser.close()
-    await _reauth.playwright.stop()
-    _reauth.playwright = None
-    _reauth.browser = None
-    _reauth.context = None
-    _reauth.page = None
 
 
 async def _extrair_nomes_produtos(page) -> list[str]:
@@ -1016,16 +955,15 @@ async def iniciar_montagem(req: MontagemRequest):
     cookies = carregar_cookies()
 
     if not cookies:
-        if not _reauth.aberto():
-            await _abrir_reauth()
-            return {'status': 'reauth_needed', 'mensagem': 'Faça login na janela que abriu. Depois clique em Pedir novamente.'}
-        logado = await _verificar_login_reauth()
-        if not logado:
-            return {'status': 'reauth_needed', 'mensagem': 'Ainda não logado. Faça login e clique em Pedir novamente.'}
-        await _finalizar_reauth()
-        cookies = carregar_cookies()
-        if not cookies:
-            return {'status': 'reauth_needed', 'mensagem': 'Erro ao salvar sessão. Tente novamente.'}
+        cookies_login = await login_programatico()
+        if cookies_login:
+            salvar_cookies(cookies_login)
+            cookies = cookies_login
+        else:
+            return {
+                'status': 'erro',
+                'mensagem': 'Login falhou. Verifique credenciais HORTISABOR_EMAIL/PASSWORD no servidor.',
+            }
 
     ai_config = {'provider': req.ai_provider, 'api_key': req.ai_api_key, 'api_url': req.ai_url}
     _montagem.reset(total=len(req.itens))
