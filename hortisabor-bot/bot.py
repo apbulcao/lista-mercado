@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page, Playwright
 
+from auth import ApiKeyMiddleware
 from session import carregar_cookies, salvar_cookies, limpar_cookies
 
 
@@ -111,6 +112,7 @@ app.add_middleware(
     allow_methods=['GET', 'POST'],
     allow_headers=['*'],
 )
+app.add_middleware(ApiKeyMiddleware)
 
 
 # ---------------------------------------------------------------------------
@@ -975,6 +977,11 @@ async def _processar_montagem(itens: list[ItemRequest], cookies: list, ai_config
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
+
+@app.get('/health')
+async def health():
+    return {'ok': True}
+
 
 @app.get('/status')
 async def status():
