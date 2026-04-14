@@ -1,8 +1,19 @@
 import json
 import os
+import platform
 from pathlib import Path
 
-COOKIES_PATH = Path(os.environ.get('APPDATA', Path.home())) / 'lista-mercado' / 'hortisabor_session.json'
+
+def _default_data_dir() -> Path:
+    env = os.environ.get('HORTISABOR_DATA_DIR')
+    if env:
+        return Path(env)
+    if platform.system() == 'Windows':
+        return Path(os.environ.get('APPDATA', Path.home())) / 'lista-mercado'
+    return Path.home() / '.hortisabor-bot'
+
+
+COOKIES_PATH = _default_data_dir() / 'hortisabor_session.json'
 
 
 def carregar_cookies():
