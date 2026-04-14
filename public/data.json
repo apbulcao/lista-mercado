@@ -2,7 +2,7 @@
   "catalogo": [
     {
       "id": "bananas-prata",
-      "nome": "banana prata",
+      "nome": "Banana Prata 200g Aproximadamente 1 Unid",
       "categoria": "frutas",
       "quantidadePadrao": "6",
       "unidade": "",
@@ -13,7 +13,7 @@
     },
     {
       "id": "cebolas",
-      "nome": "cebola nacional",
+      "nome": "Cebola Nacional 220gr Aproximadamente 1 Unid",
       "categoria": "legumes",
       "quantidadePadrao": "4",
       "unidade": "",
@@ -24,7 +24,7 @@
     },
     {
       "id": "iogurte-grego",
-      "nome": "iogurte grego Yorgus",
+      "nome": "Iogurte Yorgus Grego Natural Slactose 500g",
       "categoria": "laticinios",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -35,7 +35,7 @@
     },
     {
       "id": "leite-integral",
-      "nome": "leite integral",
+      "nome": "Leite Parmalat Integral 1l",
       "categoria": "laticinios",
       "quantidadePadrao": "2",
       "unidade": "litros",
@@ -46,7 +46,7 @@
     },
     {
       "id": "milho-sweet",
-      "nome": "milho sweet",
+      "nome": "Milho Verde Sweet Trebeshi 450g",
       "categoria": "legumes",
       "quantidadePadrao": "1",
       "unidade": "pacote",
@@ -57,7 +57,7 @@
     },
     {
       "id": "morango",
-      "nome": "morango orgânico",
+      "nome": "Morango Organico Fld 250g",
       "categoria": "frutas",
       "quantidadePadrao": "1",
       "unidade": "pacotes",
@@ -68,7 +68,7 @@
     },
     {
       "id": "alho",
-      "nome": "alho fresco",
+      "nome": "Alho Roxo 80gr Aproximadamente 1 Unid",
       "categoria": "legumes",
       "quantidadePadrao": "1",
       "unidade": "cabeça",
@@ -79,7 +79,7 @@
     },
     {
       "id": "file-peito-frango",
-      "nome": "filé de peito de frango",
+      "nome": "File De Peito Frango Organico Cong Korin 700g",
       "categoria": "carnes",
       "quantidadePadrao": "1",
       "unidade": "kg",
@@ -90,7 +90,7 @@
     },
     {
       "id": "limoes-tahity",
-      "nome": "limão tahiti",
+      "nome": "Limao Tahiti 150g Aproximadamente 1 Unid",
       "categoria": "frutas",
       "quantidadePadrao": "6",
       "unidade": "",
@@ -101,7 +101,7 @@
     },
     {
       "id": "maca",
-      "nome": "maçã",
+      "nome": "Maca Gala Org Bee Organic 500g",
       "categoria": "frutas",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -112,7 +112,7 @@
     },
     {
       "id": "mamao-papaya",
-      "nome": "mamão papaya",
+      "nome": "Mamao Papaya 900g Aproximadamente 1 Unid",
       "categoria": "frutas",
       "quantidadePadrao": "3",
       "unidade": "",
@@ -123,7 +123,7 @@
     },
     {
       "id": "molho-de-tomate",
-      "nome": "molho de tomate",
+      "nome": "Passata Di Pomodoro Nor Foods 680gr",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -134,7 +134,7 @@
     },
     {
       "id": "mucarela",
-      "nome": "muçarela",
+      "nome": "Queijo Mussarela Tirolez Finissimo 100gr",
       "categoria": "laticinios",
       "quantidadePadrao": "1",
       "unidade": "bandeja",
@@ -145,7 +145,7 @@
     },
     {
       "id": "ovos-vermelhos",
-      "nome": "ovos vermelhos",
+      "nome": "Ovos Nakaura Verm Extra 20 Un",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "caixas 20un",
@@ -156,7 +156,7 @@
     },
     {
       "id": "pao-de-forma",
-      "nome": "pão de forma tradicional",
+      "nome": "Pao Forma Tradicional Pullman 480g",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -167,7 +167,7 @@
     },
     {
       "id": "patinho-moido",
-      "nome": "patinho moído extralimpo",
+      "nome": "Patinho Moido 650gr",
       "categoria": "carnes",
       "quantidadePadrao": "1",
       "unidade": "kg",
@@ -178,7 +178,7 @@
     },
     {
       "id": "alface-americana",
-      "nome": "alface americana",
+      "nome": "Alface Americana Organica Higienizada Horta Arte 150g",
       "categoria": "legumes",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -189,7 +189,7 @@
     },
     {
       "id": "azeite",
-      "nome": "azeite",
+      "nome": "Azeite Por Ex Virgem Selecao Andorinha 500ml",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "500ml",
@@ -200,7 +200,7 @@
     },
     {
       "id": "batata-doce",
-      "nome": "batata doce",
+      "nome": "Batata Doce Roxa 500gr",
       "categoria": "legumes",
       "quantidadePadrao": "2",
       "unidade": "bandejas",
@@ -211,7 +211,7 @@
     },
     {
       "id": "brocolis-ninja",
-      "nome": "brócolis ninja",
+      "nome": "Brocolis Ninja Und",
       "categoria": "legumes",
       "quantidadePadrao": "2",
       "unidade": "",
@@ -222,7 +222,7 @@
     },
     {
       "id": "cenouras",
-      "nome": "cenoura",
+      "nome": "Cenoura 200gr Aproximadamente 1 Unid",
       "categoria": "legumes",
       "quantidadePadrao": "2",
       "unidade": "",
@@ -233,7 +233,7 @@
     },
     {
       "id": "melao-amarelo",
-      "nome": "melão amarelo",
+      "nome": "Melao Amarelo Cepi 35kg Aproximadamente 1 Unid",
       "categoria": "frutas",
       "quantidadePadrao": "1",
       "unidade": "pedaço",
@@ -244,7 +244,7 @@
     },
     {
       "id": "pao-tartaruga-multigraos",
-      "nome": "pão multigrãos",
+      "nome": "Pao Tartapao Org Multigraos 600g",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "pacote",
@@ -255,7 +255,7 @@
     },
     {
       "id": "peito-de-peru",
-      "nome": "peito de peru",
+      "nome": "Peito Peru Perdigao Defumado 100gr",
       "categoria": "laticinios",
       "quantidadePadrao": "1",
       "unidade": "pacote ~200g",
@@ -266,7 +266,7 @@
     },
     {
       "id": "rucula-baby",
-      "nome": "rúcula baby",
+      "nome": "Rucula Organica Horta E Arte Un",
       "categoria": "legumes",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -277,7 +277,7 @@
     },
     {
       "id": "tomatinho-cereja",
-      "nome": "tomate cereja",
+      "nome": "Tomate Sweet Grape Bandeja 500gr",
       "categoria": "legumes",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -288,7 +288,7 @@
     },
     {
       "id": "abobora-cabotia",
-      "nome": "abóbora cabotiá",
+      "nome": "Abobora Kabotia 25kg Aproximadamente 1 Unid",
       "categoria": "legumes",
       "quantidadePadrao": "1",
       "unidade": "pedaço",
@@ -299,7 +299,7 @@
     },
     {
       "id": "abobrinhas",
-      "nome": "abobrinhas",
+      "nome": "Abobrinha Italiana 350g Aproximadamente 1 Unid",
       "categoria": "legumes",
       "quantidadePadrao": "2",
       "unidade": "",
@@ -310,7 +310,7 @@
     },
     {
       "id": "arroz-cateto",
-      "nome": "arroz cateto",
+      "nome": "Arroz Camil Cateto Integral 1kg",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "pacote",
@@ -321,7 +321,7 @@
     },
     {
       "id": "batatas-inglesas",
-      "nome": "batata lavada",
+      "nome": "Batata Lavada 280g Aproximadamente 1 Unid",
       "categoria": "legumes",
       "quantidadePadrao": "8",
       "unidade": "",
@@ -332,7 +332,7 @@
     },
     {
       "id": "biscoito-mae-terra-coco",
-      "nome": "Mae Terra Tribos Coco",
+      "nome": "Bisc Organico Mae Terra Tribos Coco 130g",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "pacote",
@@ -343,7 +343,7 @@
     },
     {
       "id": "couve-flor",
-      "nome": "couve flor",
+      "nome": "Couve Flor Und",
       "categoria": "legumes",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -354,7 +354,7 @@
     },
     {
       "id": "quiabo",
-      "nome": "quiabo",
+      "nome": "Quiabo Solo Org 300g",
       "categoria": "legumes",
       "quantidadePadrao": "1",
       "unidade": "bandejas",
@@ -365,7 +365,7 @@
     },
     {
       "id": "agua-de-coco",
-      "nome": "água de coco 1l",
+      "nome": "Agua De Coco Integral E Natural Buturi 1l",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -376,7 +376,7 @@
     },
     {
       "id": "avocado",
-      "nome": "avocados",
+      "nome": "Avocado 300g Aproximadamente 1 Unid",
       "categoria": "frutas",
       "quantidadePadrao": "2",
       "unidade": "",
@@ -387,7 +387,7 @@
     },
     {
       "id": "berinjelas",
-      "nome": "berinjelas",
+      "nome": "Berinjela Comum 500gr Aproximadamente 1 Unid",
       "categoria": "legumes",
       "quantidadePadrao": "3",
       "unidade": "",
@@ -398,7 +398,7 @@
     },
     {
       "id": "beterraba",
-      "nome": "beterraba",
+      "nome": "Beterraba 400g Aproximadamente 1 Unid",
       "categoria": "legumes",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -409,7 +409,7 @@
     },
     {
       "id": "biscoito-lev",
-      "nome": "torrada Magic Toast integral Marilan",
+      "nome": "Torrada Magic Toast Int Marilan 110g",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "pacote",
@@ -431,7 +431,7 @@
     },
     {
       "id": "bisnaguinha",
-      "nome": "bisnaguinha",
+      "nome": "Pao Bisnaguinha Panco 300g",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "pacote",
@@ -442,7 +442,7 @@
     },
     {
       "id": "chuchus",
-      "nome": "chuchus",
+      "nome": "Chuchu Preto 390gr Aproximadamente 1 Unid",
       "categoria": "legumes",
       "quantidadePadrao": "3",
       "unidade": "",
@@ -453,7 +453,7 @@
     },
     {
       "id": "cottagy-yorgus",
-      "nome": "cottage Yorgus",
+      "nome": "Qj Cottage Yorgus 400g",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "pote grande",
@@ -464,7 +464,7 @@
     },
     {
       "id": "couve-manteiga",
-      "nome": "couve manteiga orgânica",
+      "nome": "Couve Manteiga Orgmc",
       "categoria": "legumes",
       "quantidadePadrao": "1",
       "unidade": "maço",
@@ -475,7 +475,7 @@
     },
     {
       "id": "ervilha-torta",
-      "nome": "ervilha torta",
+      "nome": "Ervilha Torta Bandeja 300gr",
       "categoria": "legumes",
       "quantidadePadrao": "2",
       "unidade": "bandejas",
@@ -486,7 +486,7 @@
     },
     {
       "id": "espinafre",
-      "nome": "espinafre orgânico",
+      "nome": "Espinafre Org Solo Vivo Mc",
       "categoria": "legumes",
       "quantidadePadrao": "1",
       "unidade": "maço",
@@ -497,7 +497,7 @@
     },
     {
       "id": "feijao-preto",
-      "nome": "feijão preto",
+      "nome": "Feijao Preto Camil 1kg",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "pacote",
@@ -508,7 +508,7 @@
     },
     {
       "id": "feijao-vermelho",
-      "nome": "feijão vermelho",
+      "nome": "Feijao Vermelho Urbano Tp1 1kg",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "pacote",
@@ -519,7 +519,7 @@
     },
     {
       "id": "file-tilapia",
-      "nome": "filé tilápia",
+      "nome": "File De Tilapia Congelado Korin 450g",
       "categoria": "carnes",
       "quantidadePadrao": "1",
       "unidade": "bandeja",
@@ -530,7 +530,7 @@
     },
     {
       "id": "granola-keto",
-      "nome": "granola Keto",
+      "nome": "Granola Australian Keto Harts 300g",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "pacote",
@@ -541,7 +541,7 @@
     },
     {
       "id": "kiwi",
-      "nome": "kiwi orgânico",
+      "nome": "Kiwi Verde Importado 180g Aproximadamente 1 Unid",
       "categoria": "frutas",
       "quantidadePadrao": "2",
       "unidade": "",
@@ -552,7 +552,7 @@
     },
     {
       "id": "lombinho-suino",
-      "nome": "lombo suíno",
+      "nome": "Lombo Suino Bife Especial 500gr",
       "categoria": "carnes",
       "quantidadePadrao": "1",
       "unidade": "pacote ~500g",
@@ -563,7 +563,7 @@
     },
     {
       "id": "penne-de-cecco",
-      "nome": "penne",
+      "nome": "Macarrao Grano Duro Penne Rigate 41 De Cecco 500g",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "pacote",
@@ -574,7 +574,7 @@
     },
     {
       "id": "presunto-parma",
-      "nome": "presunto tipo parma",
+      "nome": "Presunto Cru Parma Villani 150gr",
       "categoria": "laticinios",
       "quantidadePadrao": "1",
       "unidade": "pacote ~150g",
@@ -585,7 +585,7 @@
     },
     {
       "id": "queijo-cabra-cablanca",
-      "nome": "queijo de cabra Cablanca",
+      "nome": "Queijo Cabra Cablanca 250gr",
       "categoria": "laticinios",
       "quantidadePadrao": "1",
       "unidade": "pedaço",
@@ -596,7 +596,7 @@
     },
     {
       "id": "queijo-cabra-fresco",
-      "nome": "queijo fresco de cabra",
+      "nome": "Queijo Frescal Cabra Serra Das Antas 300gr",
       "categoria": "laticinios",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -607,7 +607,7 @@
     },
     {
       "id": "requeijao",
-      "nome": "requeijão",
+      "nome": "Requeijao Tradicional Pocos De Caldas 400g",
       "categoria": "laticinios",
       "quantidadePadrao": "1",
       "unidade": "pote grande",
@@ -618,7 +618,7 @@
     },
     {
       "id": "sobrecoxa",
-      "nome": "sobrecoxa",
+      "nome": "Sobrecoxa Fgo Cong Org Korin 600g",
       "categoria": "carnes",
       "quantidadePadrao": "1",
       "unidade": "kg",
@@ -629,7 +629,7 @@
     },
     {
       "id": "suco-laranja",
-      "nome": "suco de laranja",
+      "nome": "Suco De Laranja Xando 900ml",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -640,7 +640,7 @@
     },
     {
       "id": "suco-uva",
-      "nome": "suco de uva integral",
+      "nome": "Suco Integral Uva Tinto Aurora 15l",
       "categoria": "outros",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -651,7 +651,7 @@
     },
     {
       "id": "uva-verde",
-      "nome": "uva verde sem caroço",
+      "nome": "Uva Thompson Ss 500g",
       "categoria": "frutas",
       "quantidadePadrao": "1",
       "unidade": "",
@@ -662,7 +662,7 @@
     },
     {
       "id": "vagem-francesa",
-      "nome": "vagem francesa",
+      "nome": "Vagem Francesa Bandeja 300gr",
       "categoria": "legumes",
       "quantidadePadrao": "2",
       "unidade": "bandejas",
