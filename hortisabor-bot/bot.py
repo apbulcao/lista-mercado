@@ -582,10 +582,21 @@ async def _confirmar_modal_entrega(page) -> Optional[str]:
     JS evaluate element.click() não dispara handlers React do site.
 
     Estratégia em cascata:
+    0. Botão "Entregar no endereço" (aparece quando já há endereço salvo)
     1. Clica na primeira loja Hortisabor (opção mais simples — 1 clique)
     2. Tenta botões comuns (Retirar, Confirmar)
     3. Se nada funcionar, loga diagnóstico
     """
+    # 0. Botão "Entregar no endereço" — aparece quando o site já conhece o CEP
+    try:
+        btn = page.locator('button', has_text='Entregar no endereço').first
+        if await btn.is_visible(timeout=800):
+            await btn.click()
+            await page.wait_for_timeout(1500)
+            return 'entregar_endereco'
+    except Exception:
+        pass
+
     # 1. Tenta clicar na primeira loja pelo endereço
     for texto_loja in ['Tabapuã', 'Luis Ju']:
         try:
@@ -661,85 +672,64 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
     await _fechar_modal_se_visivel(page)
     await page.screenshot(path='debug_carrinho_antes.png')
 
-    # Diagnóstico: mapeia itens visíveis no carrinho e seus controles
+    # Mapeia itens do carrinho via spinners vip-spin__quantity.
+    # O site usa inputs com essa classe para cada produto — são a âncora
+    # mais confiável (os +/- não são <button>, são spans/divs).
     cart_info = await page.evaluate("""() => {
-        // Estratégia em cascata para encontrar "linhas" do carrinho
-        // Cada site organiza de forma diferente — tenta padrões comuns
-        // NB: NÃO usar [class*="carrinho"] > div — pega divs estruturais
-        // (ex: título "Carrinho") que bypassam o filtro hasPlus
-        const rows = document.querySelectorAll(
-            '[class*="cart-item"], [class*="cart_item"], '
-          + '[class*="product-item"], [class*="item-cart"], tr[class*="item"]'
-        );
-
-        // Se seletores de classe não funcionam, tenta por estrutura:
-        // procura elementos que contêm TANTO texto de produto QUANTO botões +/-
-        let items = [];
-        const candidates = rows.length > 0
-            ? [...rows]
-            : [...document.querySelectorAll('div, li, tr')].filter(el => {
-                const text = el.innerText || '';
-                const hasPlus = el.querySelector('button')
-                    && [...el.querySelectorAll('button')].some(b =>
-                        b.innerText.trim() === '+' || b.textContent.trim() === '+');
-                const hasProductText = text.length > 20 && text.length < 500;
-                return hasPlus && hasProductText;
-              });
-
-        for (const row of candidates) {
-            // Extrai nome do produto
-            const nameEl = row.querySelector('h2, h3, h4, h5, [class*="name"], [class*="title"], [class*="descri"], a[href*="/"]');
-            const name = nameEl
-                ? nameEl.innerText.trim().split('\\n')[0].trim()
-                : row.innerText.trim().split('\\n')[0].trim();
-
-            // Extrai quantidade atual
-            const qtyInput = row.querySelector('input[type="number"], input[class*="quant"], input[class*="spin"]');
-            const qtyText = row.querySelector('[class*="quant"], [class*="qty"]');
-            const currentQty = qtyInput
-                ? qtyInput.value
-                : (qtyText ? qtyText.innerText.trim() : '?');
-
-            // Verifica se tem botão +
-            const btns = [...row.querySelectorAll('button')];
-            const hasPlus = btns.some(b => b.innerText.trim() === '+' || b.textContent.trim() === '+');
-
-            if (name && name.length > 3) {
-                items.push({ name: name.substring(0, 80), currentQty, hasPlus, hasInput: !!qtyInput });
-            }
-        }
-
-        // Fallback: se nada funcionou, retorna HTML parcial para diagnóstico
-        if (items.length === 0) {
-            const main = document.querySelector('main, [class*="content"], [class*="cart"]');
+        const spinners = [...document.querySelectorAll('input.vip-spin__quantity')];
+        if (spinners.length === 0) {
             return {
                 items: [],
-                debug_html: (main || document.body).innerHTML.substring(0, 2000),
-                all_buttons: [...document.querySelectorAll('button')].slice(0, 20).map(b => ({
-                    text: b.innerText.trim().substring(0, 30),
-                    cls: b.className.substring(0, 40)
-                })),
                 all_inputs: [...document.querySelectorAll('input')].slice(0, 15).map(inp => ({
-                    type: inp.type, cls: inp.className.substring(0, 40), val: inp.value
+                    type: inp.type, cls: inp.className.substring(0, 50), val: inp.value
                 }))
             };
         }
 
-        return { items, debug_html: null, all_buttons: null, all_inputs: null };
+        const items = [];
+        for (let i = 0; i < spinners.length; i++) {
+            const spinner = spinners[i];
+            // Sobe na árvore DOM até encontrar um container com link de produto
+            let container = spinner.parentElement;
+            for (let j = 0; j < 8 && container; j++) {
+                if (container.querySelector('a[href*="/produto/"]')) break;
+                container = container.parentElement;
+            }
+
+            // Extrai nome do produto
+            let name = '';
+            if (container) {
+                const nameEl = container.querySelector(
+                    'a[href*="/produto/"], [class*="descri"], [class*="name"], '
+                  + '[class*="title"], h2, h3, h4'
+                );
+                name = nameEl ? nameEl.innerText.trim().split('\\n')[0].trim() : '';
+                if (!name) {
+                    const lines = container.innerText.trim().split('\\n')
+                        .map(l => l.trim())
+                        .filter(l => l.length > 5 && l.length < 150 && !l.match(/^R\\$/));
+                    name = lines[0] || '';
+                }
+            }
+
+            items.push({
+                index: i,
+                name: name.substring(0, 100),
+                currentVal: spinner.value
+            });
+        }
+
+        return { items, all_inputs: null };
     }""")
 
     print(f'[bot] Carrinho: {len(cart_info.get("items", []))} item(ns) encontrados')
     for ci in cart_info.get('items', []):
-        print(f'  - "{ci["name"]}" qty={ci["currentQty"]} plus={ci["hasPlus"]} input={ci["hasInput"]}')
+        print(f'  - [{ci["index"]}] "{ci["name"]}" val={ci["currentVal"]}')
 
     if not cart_info.get('items'):
-        print(f'[bot] Carrinho: DIAGNÓSTICO — nenhum item detectado')
-        if cart_info.get('all_buttons'):
-            print(f'[bot]   Botões: {cart_info["all_buttons"][:10]}')
+        print('[bot] Carrinho: DIAGNÓSTICO — nenhum spinner encontrado')
         if cart_info.get('all_inputs'):
             print(f'[bot]   Inputs: {cart_info["all_inputs"][:10]}')
-        if cart_info.get('debug_html'):
-            print(f'[bot]   HTML (trecho): {cart_info["debug_html"][:500]}')
         await page.screenshot(path='debug_carrinho_diagnostico.png')
         return {'ajustados': [], 'nao_encontrados': [i.nome for i, _ in itens_para_ajustar]}
 
@@ -771,48 +761,29 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
         ci = cart_info['items'][matched_idx]
         print(f'[bot] Carrinho: "{item.nome}" → match "{ci["name"]}" (score={best_score})')
 
-        try:
-            current = int(ci['currentQty'])
-        except (ValueError, TypeError):
-            current = 1
+        # Seta valor diretamente no spinner via React setter
+        # (não usa botão "+" porque os +/- do site são spans, não buttons)
+        spinner_idx = ci['index']
+        ok = await page.evaluate("""(idx, newVal) => {
+            const spinners = [...document.querySelectorAll('input.vip-spin__quantity')];
+            if (idx >= spinners.length) return false;
+            const spinner = spinners[idx];
+            const setter = Object.getOwnPropertyDescriptor(
+                HTMLInputElement.prototype, 'value'
+            ).set;
+            setter.call(spinner, String(newVal));
+            spinner.dispatchEvent(new Event('input',  {bubbles: true}));
+            spinner.dispatchEvent(new Event('change', {bubbles: true}));
+            return true;
+        }""", spinner_idx, target_qty)
 
-        clicks_needed = target_qty - current
-        if clicks_needed <= 0:
-            print(f'[bot] Carrinho: "{item.nome}" já com qty={current} (target={target_qty})')
+        if ok:
+            print(f'[bot] Carrinho: "{item.nome}" → qty={target_qty} (spinner[{spinner_idx}])')
             ajustados.append(item.nome)
-            continue
-
-        # Clica "+" o número necessário de vezes
-        # Usa o índice do item no carrinho para achar o botão certo
-        for click_i in range(min(clicks_needed, 20)):
-            clicou = await page.evaluate("""(idx) => {
-                // Re-scan os itens do carrinho para pegar o estado atual
-                const candidates = [...document.querySelectorAll('div, li, tr')].filter(el => {
-                    const text = el.innerText || '';
-                    const hasPlus = el.querySelector('button')
-                        && [...el.querySelectorAll('button')].some(b =>
-                            b.innerText.trim() === '+' || b.textContent.trim() === '+');
-                    const hasProductText = text.length > 20 && text.length < 500;
-                    return hasPlus && hasProductText;
-                });
-
-                if (idx >= candidates.length) return false;
-                const row = candidates[idx];
-                const btns = [...row.querySelectorAll('button')];
-                const plus = btns.find(b => b.innerText.trim() === '+')
-                          || btns.find(b => b.textContent.trim() === '+');
-                if (!plus) return false;
-                plus.click();
-                return true;
-            }""", matched_idx)
-
-            if not clicou:
-                print(f'[bot] Carrinho: "+" não encontrado para "{item.nome}" (click {click_i + 1}/{clicks_needed})')
-                break
-            await page.wait_for_timeout(500)
-
-        ajustados.append(item.nome)
-        print(f'[bot] Carrinho: "{item.nome}" ajustado → target={target_qty}')
+        else:
+            print(f'[bot] Carrinho: falhou ao setar qty para "{item.nome}"')
+            nao_encontrados.append(item.nome)
+        await page.wait_for_timeout(500)
 
     await page.screenshot(path='debug_carrinho_depois.png')
     return {'ajustados': ajustados, 'nao_encontrados': nao_encontrados}
