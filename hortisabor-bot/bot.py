@@ -634,31 +634,34 @@ async def _confirmar_modal_entrega(page) -> Optional[str]:
 
 
 async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> dict:
-    """Navega ao carrinho e ajusta quantidades de itens que precisam qty > 1.
+    """Navega ao carrinho e ajusta quantidades e observações.
 
     Estratégia:
     1. Encontra todos os itens no carrinho (nome + controles de qty)
-    2. Para cada item da lista com qty > 1, faz match por nome
-    3. Clica "+" até chegar na quantidade desejada
+    2. Para cada item com qty > 1 ou observação, faz match por nome
+    3. Clica "+" para quantidade, preenche observação se houver
     4. Retorna dict com resultados por item
 
     Retorna: {'ajustados': [...], 'nao_encontrados': [...]}
     """
-    # Filtra itens que precisam de ajuste (qty > 1)
+    # Filtra itens que precisam de ajuste (qty > 1 ou tem observação)
     itens_para_ajustar = []
     for item in itens:
         try:
             qty = int(item.quantidade) if item.quantidade else 1
         except (ValueError, TypeError):
             qty = 1
-        if qty > 1:
-            itens_para_ajustar.append((item, qty))
+        obs = (item.observacoes or '').strip()
+        if qty > 1 or obs:
+            itens_para_ajustar.append((item, qty, obs))
 
     if not itens_para_ajustar:
-        print('[bot] Carrinho: nenhum item precisa de ajuste de quantidade')
+        print('[bot] Carrinho: nenhum item precisa de ajuste')
         return {'ajustados': [], 'nao_encontrados': []}
 
-    print(f'[bot] Carrinho: {len(itens_para_ajustar)} item(ns) precisam ajuste de qty')
+    n_qty = sum(1 for _, q, _ in itens_para_ajustar if q > 1)
+    n_obs = sum(1 for _, _, o in itens_para_ajustar if o)
+    print(f'[bot] Carrinho: {n_qty} ajuste(s) de qty, {n_obs} observação(ões)')
     await page.goto(URL_CARRINHO, wait_until='domcontentloaded', timeout=15000)
     await page.wait_for_timeout(2000)  # Aguarda renderização dos itens do carrinho
     await _fechar_modal_se_visivel(page)
@@ -724,7 +727,7 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
         if cart_info.get('all_inputs'):
             print(f'[bot]   Inputs: {cart_info["all_inputs"][:10]}')
         await page.screenshot(path='debug_carrinho_diagnostico.png')
-        return {'ajustados': [], 'nao_encontrados': [i.nome for i, _ in itens_para_ajustar]}
+        return {'ajustados': [], 'nao_encontrados': [i.nome for i, _, _ in itens_para_ajustar]}
 
     # Verifica se existem botões btn-increment visíveis (diagnóstico)
     inc_count = await page.locator('.btn-increment:visible').count()
@@ -735,7 +738,7 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
     ajustados = []
     nao_encontrados = []
 
-    for item, target_qty in itens_para_ajustar:
+    for item, target_qty, obs in itens_para_ajustar:
         # Match por nome: slug da URL vs nome no carrinho (case-insensitive, parcial)
         slug_parts = item.url_hortisabor.rstrip('/').split('/')[-1].replace('-', ' ').lower().split() if item.url_hortisabor else []
         nome_parts = item.nome.lower().split()
@@ -757,29 +760,55 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
             continue
 
         ci = cart_info['items'][matched_idx]
+        spinner_idx = ci['index']
         print(f'[bot] Carrinho: "{item.nome}" → match "{ci["name"]}" (score={best_score})')
 
-        # Clica no botão "+" (btn-increment) para incrementar a quantidade.
-        # O site Angular usa <vip-button-icon-rounded class="btn-increment">
-        # que NÃO é irmão direto do input, mas está no mesmo container do item.
-        # Como cada item do carrinho tem exatamente um btn-increment visível,
-        # o índice do spinner corresponde ao índice do botão "+".
-        spinner_idx = ci['index']
+        # --- Ajuste de quantidade ---
         clicks_needed = target_qty - 1
-        if clicks_needed <= 0:
-            continue
+        if clicks_needed > 0:
+            plus_locator = page.locator('.btn-increment:visible').nth(spinner_idx)
+            try:
+                for _ in range(clicks_needed):
+                    await plus_locator.click(timeout=3000)
+                    await page.wait_for_timeout(400)
+                print(f'[bot] Carrinho: "{item.nome}" → +{clicks_needed} cliques')
+            except Exception as e:
+                print(f'[bot] Carrinho: falhou qty "+" para "{item.nome}": {e}')
+                nao_encontrados.append(item.nome)
+                continue
 
-        plus_locator = page.locator('.btn-increment:visible').nth(spinner_idx)
+        # --- Observação ---
+        if obs:
+            try:
+                # Clica em "Adicionar Observação" do item correspondente
+                obs_links = page.get_by_text('Adicionar Observação')
+                obs_link = obs_links.nth(spinner_idx)
+                await obs_link.click(timeout=3000)
+                await page.wait_for_timeout(500)
 
-        try:
-            for click_num in range(clicks_needed):
-                await plus_locator.click(timeout=3000)
-                await page.wait_for_timeout(400)
-            print(f'[bot] Carrinho: "{item.nome}" → +{clicks_needed} cliques (spinner[{spinner_idx}])')
-            ajustados.append(item.nome)
-        except Exception as e:
-            print(f'[bot] Carrinho: falhou ao clicar "+" para "{item.nome}": {e}')
-            nao_encontrados.append(item.nome)
+                # Digita a observação no campo que aparece
+                obs_input = page.locator('textarea:visible, input[placeholder*="bserva"]:visible').last
+                await obs_input.fill(obs)
+                await page.wait_for_timeout(300)
+
+                # Tenta confirmar (botão OK/Salvar/Confirmar)
+                confirm_btn = page.locator('button:visible', has_text='OK').or_(
+                    page.locator('button:visible', has_text='Salvar')
+                ).or_(
+                    page.locator('button:visible', has_text='Confirmar')
+                ).first
+                try:
+                    await confirm_btn.click(timeout=2000)
+                except Exception:
+                    # Se não tem botão, a observação pode salvar ao perder foco
+                    await obs_input.press('Enter')
+
+                print(f'[bot] Carrinho: "{item.nome}" → obs: "{obs}"')
+                await page.wait_for_timeout(300)
+            except Exception as e:
+                print(f'[bot] Carrinho: falhou obs para "{item.nome}": {e}')
+
+        ajustados.append(item.nome)
 
     await page.screenshot(path='debug_carrinho_depois.png')
     return {'ajustados': ajustados, 'nao_encontrados': nao_encontrados}
