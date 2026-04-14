@@ -484,10 +484,30 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
             if not clicou:
                 return False
 
+            # O site exige seleção de loja antes de confirmar a adição.
+            # Sem clicar na loja, o item NÃO entra no carrinho.
             await page.wait_for_timeout(1500)
+            confirmou = await page.evaluate("""() => {
+                // Procura botões/links com nome de loja (contém "Hortisabor")
+                const els = [...document.querySelectorAll('button, a, [role="button"], div[onclick]')];
+                const loja = els.find(el => {
+                    const txt = el.innerText || '';
+                    return txt.toLowerCase().includes('hortisabor') &&
+                           txt.length > 10 && txt.length < 200 &&
+                           !txt.toLowerCase().includes('adicionar');
+                });
+                if (loja) { loja.click(); return loja.innerText.trim().substring(0, 60); }
+                return null;
+            }""")
+            if confirmou:
+                print(f'[bot] Loja selecionada: "{confirmou}"')
+                await page.wait_for_timeout(2000)
+            else:
+                print('[bot] AVISO: nenhum botão de loja encontrado após Adicionar')
+
             await page.screenshot(path=f'debug_{slug}_depois.png')
 
-            # Navega de volta ao home — isso fecha qualquer modal aberto
+            # Navega de volta ao home
             await page.goto(URL_HOME, wait_until='networkidle', timeout=15000)
             await _fechar_modal_se_visivel(page)
             return True
