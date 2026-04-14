@@ -38,3 +38,13 @@ export function normalizarQuantidade(valor) {
 export function quantidadeValida(valor) {
   return /^[1-9]\d*$/.test(String(valor ?? '').trim())
 }
+
+export function extrairNomeDaUrl(url) {
+  if (!url) return ''
+  const match = String(url).match(/\/produto\/\d+\/([a-z0-9-]+)\/?$/)
+  if (!match) return ''
+  return match[1]
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}

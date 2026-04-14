@@ -4,6 +4,7 @@ import {
   criarIdItem,
   normalizarQuantidade,
   quantidadeValida,
+  extrairNomeDaUrl,
 } from '../itemUtils'
 
 describe('itemUtils', () => {
@@ -51,5 +52,21 @@ describe('itemUtils', () => {
     expect(quantidadeValida('0')).toBe(false)
     expect(quantidadeValida('')).toBe(false)
     expect(quantidadeValida('1.5')).toBe(false)
+  })
+
+  it('extrai nome do produto a partir da URL do Hortisabor', () => {
+    expect(extrairNomeDaUrl('https://www.delivery.hortisabor.com.br/produto/35347/peito-peru-perdigao-defumado-100gr'))
+      .toBe('Peito Peru Perdigao Defumado 100gr')
+  })
+
+  it('extrai nome mesmo com barra no final da URL', () => {
+    expect(extrairNomeDaUrl('https://www.delivery.hortisabor.com.br/produto/10849/banana-prata-200g-aproximadamente-1-unid/'))
+      .toBe('Banana Prata 200g Aproximadamente 1 Unid')
+  })
+
+  it('retorna string vazia para URL inválida ou sem slug', () => {
+    expect(extrairNomeDaUrl('')).toBe('')
+    expect(extrairNomeDaUrl('https://google.com')).toBe('')
+    expect(extrairNomeDaUrl('texto qualquer')).toBe('')
   })
 })
