@@ -315,12 +315,15 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
             await page.goto(item.url_hortisabor, wait_until='networkidle', timeout=15000)
             await _fechar_modal_se_visivel(page)
             btn = page.locator('button', has_text='Adicionar').first
-            await btn.wait_for(state='visible', timeout=8000)
+            # Rola até o botão (pode estar fora do viewport) e clica com force
+            # para contornar visibilidade CSS sem mudar o comportamento real
+            await btn.scroll_into_view_if_needed(timeout=8000)
+            await page.wait_for_timeout(500)
             if item.quantidade and item.quantidade not in ('', '1'):
                 qtd_input = page.locator(SEL_QUANTIDADE).first
                 if await qtd_input.is_visible():
                     await qtd_input.fill(item.quantidade)
-            await btn.click()
+            await btn.click(force=True)
             await page.wait_for_timeout(1000)
             await _fechar_modal_se_visivel(page)
             await page.goto(URL_HOME, wait_until='networkidle', timeout=15000)
