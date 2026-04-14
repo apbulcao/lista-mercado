@@ -97,24 +97,55 @@ export default function Catalogo({ catalogo = [], onUrlChange }) {
           </div>
           <div className="p-2 flex flex-col gap-1.5">
             {comUrl.map((item) => (
-              <div
-                key={item.id}
-                className="rounded-lg px-3 py-2 flex items-center justify-between"
-                style={{ backgroundColor: '#E8F4F0', border: '1px solid #B7DDD0' }}
-              >
-                <div>
-                  <div className="text-sm font-medium" style={{ color: '#1A1814' }}>{item.nome}</div>
-                  <div className="text-xs" style={{ color: '#5A8A78' }}>{item.categoria}</div>
-                </div>
-                <a
-                  href={item.urlHortisabor}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs rounded px-1.5 py-0.5 font-medium"
-                  style={{ color: '#2D6A4F', backgroundColor: 'white', border: '1px solid #B7DDD0', textDecoration: 'none' }}
+              <div key={item.id}>
+                <div
+                  className="rounded-lg px-3 py-2 flex items-center justify-between"
+                  style={{ backgroundColor: editandoId === item.id ? '#FFFBF0' : '#E8F4F0', border: `1.5px solid ${editandoId === item.id ? '#F5A623' : '#B7DDD0'}` }}
                 >
-                  ↗
-                </a>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium" style={{ color: '#1A1814' }}>{item.nome}</div>
+                    <div className="text-xs" style={{ color: '#5A8A78' }}>{item.categoria}</div>
+                  </div>
+                  <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                    <a
+                      href={item.urlHortisabor}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs rounded px-1.5 py-0.5 font-medium"
+                      style={{ color: '#2D6A4F', backgroundColor: 'white', border: '1px solid #B7DDD0', textDecoration: 'none' }}
+                    >
+                      ↗
+                    </a>
+                    <button
+                      onClick={() => abrirEdicao(item)}
+                      className="text-xs rounded px-1.5 py-0.5 font-medium"
+                      style={{ color: '#7A7267', backgroundColor: 'white', border: '1px solid #B7DDD0', cursor: 'pointer' }}
+                    >
+                      ✎
+                    </button>
+                  </div>
+                </div>
+                {editandoId === item.id && (
+                  <div className="flex gap-1.5 mt-1 px-1">
+                    <input
+                      autoFocus
+                      type="url"
+                      value={urlInput}
+                      onChange={(e) => setUrlInput(e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(e, item.id)}
+                      placeholder="Cole o link do produto no Hortisabor..."
+                      className="flex-1 text-xs rounded-lg px-2 py-1.5 focus:outline-none"
+                      style={{ border: '1px solid #C5BAB0', backgroundColor: '#FAFAF8', color: '#1A1814' }}
+                    />
+                    <button
+                      onClick={() => salvar(item.id)}
+                      className="text-xs font-semibold rounded-lg px-3 py-1.5 text-white"
+                      style={{ backgroundColor: '#2D6A4F', border: 'none', cursor: 'pointer' }}
+                    >
+                      Salvar
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
