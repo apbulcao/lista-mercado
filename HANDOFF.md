@@ -1,95 +1,87 @@
 # HANDOFF — lista-mercado
-**Data:** 2026-04-14 (sessão 8, parte 2)
+**Data:** 2026-04-14 (sessão 10)
 **Branch:** `main`
+**Commit:** `dabe3a0`
 
 ---
 
 ## O que foi feito nesta sessão
 
-### Rodada 1: carrinho vazio — 3 fixes (commit `1a92b94`)
+### Fix: normalizarQuantidade peso+unidade
+- Valores como "100g", "500gr", "200ml" agora retornam "1" (peso do produto, não contagem)
+- Antes: `normalizarQuantidade("100g")` → `"100"` — causava peito de peru com qty=100
+- Depois: `normalizarQuantidade("100g")` → `"1"`
+- Regex guard: `/^\d+\s*(g|gr|kg|ml|l)\b/` no início da função
+- Testes adicionados para peso+unidade, contagem separada, strings mistas
 
-O bot clicava "Adicionar" mas o carrinho ficava vazio. Três causas raiz:
+### Feat: auto-fill nome via URL Hortisabor
+- Nova função `extrairNomeDaUrl` em `itemUtils.js`
+- Extrai slug da URL e converte kebab-case → title case
+- Ex: `/produto/35347/peito-peru-perdigao-defumado-100gr` → "Peito Peru Perdigao Defumado 100gr"
+- Wired no componente `AdicionarItemNovo`: ao colar URL, nome é preenchido automaticamente
+- Nome continua editável após auto-fill
 
-| Fix | Problema | Solução |
-|-----|----------|---------|
-| Modal JS evaluate | `element.click()` não disparava handlers React | Nova `_confirmar_modal_entrega` com Playwright locators |
-| Timeouts | `networkidle` nunca resolvia (analytics persistentes) | `domcontentloaded` + wait explícito por botão Adicionar |
-| Parser carrinho | Seletor `[class*="carrinho"] > div` pegava falso positivo | Removido |
+### Feat: observações persistentes (observacaoPadrao)
+- Novo campo `observacaoPadrao` no catálogo (mesmo padrão de `quantidadePadrao`)
+- Salvo em `handleConfirmar` quando lista é confirmada
+- Carregado em `carregarApp`, `handleAdicionarDoCatalogo`, `handleSmartInputItems`
+- Persiste entre sessões via data.json (GitHub) e localStorage (buffer)
 
-### Rodada 2: itens adicionados mas quantidades não ajustadas (commit `4f4b81e`)
+### Fix: localStorage buffer após salvar
+- `limparDadosPendentes()` era chamado imediatamente após push via API
+- Deploy do GitHub Pages leva ~2min → hard-refresh no intervalo perdia dados
+- Fix: `salvarDadosPendentes` sempre mantém snapshot local como buffer
+- Buffer ignorado automaticamente quando deploy remoto atualiza (comparação de historico.length)
 
-Teste 2 mostrou progresso: itens entraram no carrinho (9 spinners `vip-spin__quantity` detectados). Dois problemas restantes:
+### Bot: diagnóstico de observações no carrinho
+- Adicionado scroll + wait (800ms) antes de buscar link de observação
+- Adicionado logging diagnóstico: quando não encontra o botão, loga elementos clicáveis em cada nível do DOM
+- **Ainda não testado** — precisa rodar bot e verificar logs
 
-| Fix | Problema | Solução |
-|-----|----------|---------|
-| 1º item sem modal | Modal do 1º item mostra `BUTTON: Entregar no endereço:...` (não loja) | Adicionou "Entregar no endereço" como step 0 na cascata |
-| Parser 0 itens | Carrinho não tem `<button>` com "+"; +/- são spans/divs | Reescreveu parser: usa `input.vip-spin__quantity` como âncora, sobe DOM até `a[href*="/produto/"]` para nome |
-| Qty não ajustada | Botão "+" inexistente como `<button>` | Seta valor diretamente via React setter (`HTMLInputElement.prototype.value.set` + dispatch input/change) |
+### Limpeza local + pacote Windows
+- Removidos: `superpowers_temp/`, `.superpowers/`, `__pycache__/`, debug screenshots, `descobrir_seletores.py`, `test_bot_state.py`, `pytest.ini`, `tokens.env.rtf`
+- Criado `~/Desktop/hortisabor-bot.zip` com pacote para Windows:
+  - `instalar.bat` — instala Python + deps + Chromium
+  - `iniciar.bat` — lê tokens.env, abre browser com setup URL, inicia bot
+  - `tokens.env` — GH_TOKEN + GH_REPO + GROQ_KEY
 
 ---
 
-## Estado atual — **AGUARDANDO TESTE 3**
+## Estado atual
 
-### Modal de entrega — cascata atual:
-```
-0. Botão "Entregar no endereço" (user já tem CEP salvo)
-1. get_by_text('Tabapuã') → loja SABIA
-2. get_by_text('Luis Ju') → segunda loja
-3. Botões: 'Retirar', 'Confirmar', 'Selecionar', 'Continuar'
-4. get_by_text('Hortisabor') → fallback genérico
-5. Diagnóstico (loga elementos visíveis)
-```
+### Observações no carrinho do bot
+- ⏳ Diagnóstico adicionado mas não testado
+- O log vai mostrar elementos clicáveis ao redor de cada item quando "sem botão de observação"
+- Risco: o link pode não existir para certos itens, ou pode ser lazy-loaded
 
-### Parser do carrinho — nova abordagem:
-```
-1. Encontra todos input.vip-spin__quantity
-2. Para cada: sobe DOM até container com a[href*="/produto/"]
-3. Extrai nome do produto do container
-4. Match por tokens (slug da URL vs nome no carrinho, score >= 2)
-5. Ajusta via React setter direto no input (sem botão "+")
-```
-
-### O que verificar no teste 3:
-- `[bot] Modal de entrega: entregar_endereco` no 1º item
-- `[bot] Modal de entrega: loja:hortisabor` nos demais
-- `[bot] Carrinho: N item(ns) encontrados` com N > 0
-- `[bot] Carrinho: "banana prata" → match "..." (score=X)` para cada item
-- `[bot] Carrinho: "banana prata" → qty=6 (spinner[0])` para ajustes
-- `debug_carrinho_depois.png` mostra quantidades alteradas
-
-### Risco: valores tipo "200g" no spinner
-Itens vendidos por peso (banana, cebola, alho, limão, mamão) mostram '200g', '220g' etc. no spinner. O setter vai substituir por um número inteiro (ex: '6'). Se o site rejeitar, pode ser necessário usar o formato com 'g'.
-
-### Tasks pendentes do plano original
-- **Task 7** (limpeza código morto) — só após teste bem-sucedido
+### Pacote Windows
+- ✅ Zip criado em ~/Desktop/hortisabor-bot.zip
+- Precisa testar no Windows da esposa
 
 ---
 
 ## Decisões de arquitetura
 
-- **Playwright locators > JS evaluate:** Para sites React/Angular, `page.locator().click()` é obrigatório. `element.click()` via evaluate funciona só para `<button>` nativos.
-- **domcontentloaded > networkidle:** Para sites com analytics persistentes.
-- **"Entregar no endereço" primeiro:** Quando o site já tem CEP salvo, esse botão aparece e é a melhor opção (entrega, não retirada).
-- **Spinner como âncora do carrinho:** `input.vip-spin__quantity` é o seletor mais estável no carrinho — sempre existe e identifica cada produto.
-- **React setter para qty:** `HTMLInputElement.prototype.value.set` + dispatch `input`/`change` é o padrão para inputs React. Não depende de botões +/-.
-- **Separação adição/quantidade:** Adiciona qty=1 por produto. Quantidades >1 ajustadas em visita única ao carrinho.
+- **observacaoPadrao no catálogo (não no histórico):** Observação é um default per-item, como quantidadePadrao. Não recalculada do histórico.
+- **localStorage como buffer permanente:** Não limpar após save resolve race condition com deploy do Pages. Buffer descartado automaticamente quando remote alcança.
+- **Nome via slug (não fetch):** Extrair do slug da URL evita CORS e chamadas de rede. Title-case é suficiente.
+- **normalizarQuantidade com guard de peso:** Regex no início detecta peso+unidade colada. Tudo que não é peso segue lógica anterior.
 
 ---
 
 ## Arquivos relevantes
 
-- `hortisabor-bot/bot.py` — bot principal
-  - `_confirmar_modal_entrega` (cascata de cliques pós-Adicionar)
-  - `_adicionar_item` (navega + adiciona + confirma modal)
-  - `_ajustar_quantidades_no_carrinho` (parser + setter)
-- `public/data.json` — catálogo
-- `hortisabor-bot/debug_*.png` — screenshots da última execução
+- `src/lib/itemUtils.js` — `normalizarQuantidade` (fix), `extrairNomeDaUrl` (novo)
+- `src/components/AdicionarItemNovo.jsx` — `handleUrlChange` (auto-fill)
+- `src/App.jsx` — `observacaoPadrao` em 4 pontos + buffer localStorage
+- `hortisabor-bot/bot.py` — diagnóstico de observações (scroll + log)
+- `hortisabor-bot/iniciar.bat` — lê tokens.env e abre browser com setup URL
+- `hortisabor-bot/instalar.bat` — instalação Python + deps + Chromium
 
 ---
 
 ## Próximos passos
 
-1. **Rodar o bot** (teste 3) e verificar logs acima
-2. Se qty "200g" → "6" for rejeitada: ajustar formato (multiplicar peso × qty)
-3. Após estabilizar: Task 7 (limpeza de código morto)
-4. Deploy frontend para GitHub Pages (já pushed)
+1. **Testar observações no bot** — rodar bot com obs e verificar logs diagnósticos
+2. **Testar pacote Windows** — instalar na máquina da esposa
+3. **Limpeza git** — arquivos deletados localmente (descobrir_seletores, tests, pytest.ini) ainda tracked no repo

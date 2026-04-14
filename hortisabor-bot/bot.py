@@ -780,6 +780,12 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
         # --- Observação ---
         if obs:
             try:
+                # Scroll até o spinner do item para garantir que lazy-rendered
+                # elements (como o link de observação) estejam no DOM
+                spinner_el = page.locator('input.vip-spin__quantity:visible').nth(spinner_idx)
+                await spinner_el.scroll_into_view_if_needed()
+                await page.wait_for_timeout(800)
+
                 # Encontra o container do item a partir do spinner,
                 # depois busca o link de observação DENTRO desse container.
                 # Isso evita desalinhamento de índices (nem todo item tem o link).
@@ -788,6 +794,7 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
                         .filter(el => el.offsetParent !== null);
                     if (idx >= spinners.length) return null;
                     let container = spinners[idx].parentElement;
+                    const levels = [];
                     for (let j = 0; j < 10 && container; j++) {
                         const link = container.querySelector(
                             '[class*="observa"], [class*="Observa"]'
@@ -796,15 +803,25 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
                             .find(el => /observa/i.test(el.innerText) && el.innerText.length < 50);
                         if (link || textLink) {
                             const el = link || textLink;
-                            return {found: true, tag: el.tagName, text: el.innerText.substring(0, 50)};
+                            return {found: true, tag: el.tagName, text: el.innerText.substring(0, 50), level: j};
+                        }
+                        // Diagnóstico: captura links e textos curtos neste nível
+                        const clickables = [...container.querySelectorAll('a, button, [role="button"]')]
+                            .filter(el => el.offsetParent !== null && el.innerText.trim().length > 0 && el.innerText.trim().length < 80)
+                            .map(el => el.innerText.trim().split('\\n')[0].substring(0, 60));
+                        if (clickables.length > 0) {
+                            levels.push({level: j, tag: container.tagName, cls: container.className.substring(0, 40), clickables});
                         }
                         container = container.parentElement;
                     }
-                    return {found: false};
+                    return {found: false, levels};
                 }""", spinner_idx)
 
                 if not obs_link or not obs_link.get('found'):
+                    diag = obs_link.get('levels', []) if obs_link else []
                     print(f'[bot] Carrinho: "{item.nome}" → sem botão de observação')
+                    for lv in diag:
+                        print(f'[bot]   DOM nível {lv["level"]}: <{lv["tag"]} class="{lv["cls"]}"> clickables={lv["clickables"]}')
                 else:
                     # Clica no link de observação via locator relativo ao spinner
                     spinner_loc = page.locator('input.vip-spin__quantity:visible').nth(spinner_idx)
