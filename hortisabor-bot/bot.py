@@ -21,6 +21,7 @@ class ItemRequest(BaseModel):
     marca: str = ''
     detalhes: str = ''
     url_hortisabor: str = ''
+    observacoes: str = ''
 
 
 class MontagemRequest(BaseModel):
@@ -676,7 +677,8 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
     # O site usa inputs com essa classe para cada produto — são a âncora
     # mais confiável (os +/- não são <button>, são spans/divs).
     cart_info = await page.evaluate("""() => {
-        const spinners = [...document.querySelectorAll('input.vip-spin__quantity')];
+        const spinners = [...document.querySelectorAll('input.vip-spin__quantity')]
+            .filter(el => el.offsetParent !== null);
         if (spinners.length === 0) {
             return {
                 items: [],
@@ -733,6 +735,11 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
         await page.screenshot(path='debug_carrinho_diagnostico.png')
         return {'ajustados': [], 'nao_encontrados': [i.nome for i, _ in itens_para_ajustar]}
 
+    # Verifica se existem botões btn-increment visíveis (diagnóstico)
+    inc_count = await page.locator('.btn-increment:visible').count()
+    dec_count = await page.locator('.btn-decrement:visible').count()
+    print(f'[bot] Carrinho: btn-increment visíveis={inc_count}, btn-decrement visíveis={dec_count}')
+
     # Match e ajuste de quantidades
     ajustados = []
     nao_encontrados = []
@@ -761,29 +768,27 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
         ci = cart_info['items'][matched_idx]
         print(f'[bot] Carrinho: "{item.nome}" → match "{ci["name"]}" (score={best_score})')
 
-        # Seta valor diretamente no spinner via React setter
-        # (não usa botão "+" porque os +/- do site são spans, não buttons)
+        # Clica no botão "+" (btn-increment) para incrementar a quantidade.
+        # O site Angular usa <vip-button-icon-rounded class="btn-increment">
+        # que NÃO é irmão direto do input, mas está no mesmo container do item.
+        # Como cada item do carrinho tem exatamente um btn-increment visível,
+        # o índice do spinner corresponde ao índice do botão "+".
         spinner_idx = ci['index']
-        ok = await page.evaluate("""(idx, newVal) => {
-            const spinners = [...document.querySelectorAll('input.vip-spin__quantity')];
-            if (idx >= spinners.length) return false;
-            const spinner = spinners[idx];
-            const setter = Object.getOwnPropertyDescriptor(
-                HTMLInputElement.prototype, 'value'
-            ).set;
-            setter.call(spinner, String(newVal));
-            spinner.dispatchEvent(new Event('input',  {bubbles: true}));
-            spinner.dispatchEvent(new Event('change', {bubbles: true}));
-            return true;
-        }""", spinner_idx, target_qty)
+        clicks_needed = target_qty - 1
+        if clicks_needed <= 0:
+            continue
 
-        if ok:
-            print(f'[bot] Carrinho: "{item.nome}" → qty={target_qty} (spinner[{spinner_idx}])')
+        plus_locator = page.locator('.btn-increment:visible').nth(spinner_idx)
+
+        try:
+            for click_num in range(clicks_needed):
+                await plus_locator.click(timeout=3000)
+                await page.wait_for_timeout(400)
+            print(f'[bot] Carrinho: "{item.nome}" → +{clicks_needed} cliques (spinner[{spinner_idx}])')
             ajustados.append(item.nome)
-        else:
-            print(f'[bot] Carrinho: falhou ao setar qty para "{item.nome}"')
+        except Exception as e:
+            print(f'[bot] Carrinho: falhou ao clicar "+" para "{item.nome}": {e}')
             nao_encontrados.append(item.nome)
-        await page.wait_for_timeout(500)
 
     await page.screenshot(path='debug_carrinho_depois.png')
     return {'ajustados': ajustados, 'nao_encontrados': nao_encontrados}

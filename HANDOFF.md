@@ -1,92 +1,95 @@
 # HANDOFF — lista-mercado
-**Data:** 2026-04-13 (sessão 4)
+**Data:** 2026-04-14 (sessão 8, parte 2)
 **Branch:** `main`
 
 ---
 
 ## O que foi feito nesta sessão
 
-### Tasks 3–6 implementadas (plano `2026-04-13-catalogo-url-hortisabor.md`)
+### Rodada 1: carrinho vazio — 3 fixes (commit `1a92b94`)
 
-| Commit | O que fez |
-|--------|-----------|
-| `dd17588` | `Catalogo.jsx` — duas colunas sem/com URL com edição inline |
-| `e140030` | Fix `Catalogo.jsx` — default prop + testes Escape e catálogo completo |
-| `ad34ab5` | `AdicionarItemNovo.jsx` — campo URL Hortisabor opcional |
-| `3b53877` | `PausaModal.jsx` — modal de pausa durante compra |
-| `2731881` | `App.jsx` — aba catálogo, polling de montagem, PausaModal |
-| `b7dc26e` | Fix `App.jsx` — cleanup polling, race condition, try/catch |
+O bot clicava "Adicionar" mas o carrinho ficava vazio. Três causas raiz:
 
-### Setup automático de tokens
-- `903935b` — `App.jsx` lê params de setup no hash da URL (`#setup&token=X&repo=Y&groq=Z`), salva no localStorage e limpa a URL
-- `hortisabor-bot/iniciar.command` atualizado para ler `.tokens` e abrir a URL com params
-- `.tokens` criado (gitignored) em `lista-mercado/.tokens` com GitHub token e Groq key
+| Fix | Problema | Solução |
+|-----|----------|---------|
+| Modal JS evaluate | `element.click()` não disparava handlers React | Nova `_confirmar_modal_entrega` com Playwright locators |
+| Timeouts | `networkidle` nunca resolvia (analytics persistentes) | `domcontentloaded` + wait explícito por botão Adicionar |
+| Parser carrinho | Seletor `[class*="carrinho"] > div` pegava falso positivo | Removido |
 
-### Fix bot — botão Adicionar oculto
-- `64f0bb9` — Hortisabor mudou layout: botão "Adicionar" ficava fora do viewport (hidden para Playwright)
-- Fix: `scroll_into_view_if_needed()` + `click(force=True)` em vez de `wait_for(state='visible')`
-- **Não testado ainda** — bot foi corrigido mas ainda não houve run bem-sucedido confirmado
+### Rodada 2: itens adicionados mas quantidades não ajustadas (commit `4f4b81e`)
 
----
+Teste 2 mostrou progresso: itens entraram no carrinho (9 spinners `vip-spin__quantity` detectados). Dois problemas restantes:
 
-## Estado atual do frontend
-
-**Novas features:**
-- Aba **Catálogo** no header (entre Lista e Histórico) — mostra todos os itens em duas colunas (sem/com URL), com barra de cobertura e edição inline de URL
-- Formulário **Adicionar item** tem campo URL opcional (Hortisabor)
-- **PausaModal** — aparece quando bot encontra item sem URL durante montagem; usuário cola a URL e o bot retoma
-- Fluxo de montagem é assíncrono: `POST /iniciar-montagem` → polling `/status` a 1s → modal ou resultado
-
-**Suite de testes:** 82 testes passando
+| Fix | Problema | Solução |
+|-----|----------|---------|
+| 1º item sem modal | Modal do 1º item mostra `BUTTON: Entregar no endereço:...` (não loja) | Adicionou "Entregar no endereço" como step 0 na cascata |
+| Parser 0 itens | Carrinho não tem `<button>` com "+"; +/- são spans/divs | Reescreveu parser: usa `input.vip-spin__quantity` como âncora, sobe DOM até `a[href*="/produto/"]` para nome |
+| Qty não ajustada | Botão "+" inexistente como `<button>` | Seta valor diretamente via React setter (`HTMLInputElement.prototype.value.set` + dispatch input/change) |
 
 ---
 
-## Estado atual do bot (`hortisabor-bot/bot.py`)
+## Estado atual — **AGUARDANDO TESTE 3**
 
-**Endpoints disponíveis:**
-- `GET /status` — retorna estado de montagem (idle/processando/aguardando_url/concluido/erro)
-- `POST /iniciar-montagem` — inicia background task com os itens
-- `POST /fornecer-url` — desbloqueia background task com URL fornecida pelo usuário
-
-**Fluxo:**
+### Modal de entrega — cascata atual:
 ```
-App → POST /iniciar-montagem
-  → bot spawna _processar_montagem em background
-  → retorna {"status": "iniciado"}
-
-App polling GET /status a cada 1s
-  → se aguardando_url: mostra PausaModal
-  → se concluido: mostra link do carrinho
-
-App → POST /fornecer-url {item_id, url}
-  → bot retoma background task
+0. Botão "Entregar no endereço" (user já tem CEP salvo)
+1. get_by_text('Tabapuã') → loja SABIA
+2. get_by_text('Luis Ju') → segunda loja
+3. Botões: 'Retirar', 'Confirmar', 'Selecionar', 'Continuar'
+4. get_by_text('Hortisabor') → fallback genérico
+5. Diagnóstico (loga elementos visíveis)
 ```
 
-**Bug conhecido resolvido:** botão "Adicionar" no site do Hortisabor estava hidden para Playwright — corrigido com scroll + force click.
+### Parser do carrinho — nova abordagem:
+```
+1. Encontra todos input.vip-spin__quantity
+2. Para cada: sobe DOM até container com a[href*="/produto/"]
+3. Extrai nome do produto do container
+4. Match por tokens (slug da URL vs nome no carrinho, score >= 2)
+5. Ajusta via React setter direto no input (sem botão "+")
+```
+
+### O que verificar no teste 3:
+- `[bot] Modal de entrega: entregar_endereco` no 1º item
+- `[bot] Modal de entrega: loja:hortisabor` nos demais
+- `[bot] Carrinho: N item(ns) encontrados` com N > 0
+- `[bot] Carrinho: "banana prata" → match "..." (score=X)` para cada item
+- `[bot] Carrinho: "banana prata" → qty=6 (spinner[0])` para ajustes
+- `debug_carrinho_depois.png` mostra quantidades alteradas
+
+### Risco: valores tipo "200g" no spinner
+Itens vendidos por peso (banana, cebola, alho, limão, mamão) mostram '200g', '220g' etc. no spinner. O setter vai substituir por um número inteiro (ex: '6'). Se o site rejeitar, pode ser necessário usar o formato com 'g'.
+
+### Tasks pendentes do plano original
+- **Task 7** (limpeza código morto) — só após teste bem-sucedido
 
 ---
 
-## Arquivos de configuração
+## Decisões de arquitetura
 
-- `.tokens` — GitHub token + Groq key (gitignored, em `lista-mercado/.tokens`)
-- `hortisabor-bot/iniciar.command` — lê `.tokens`, sobe o bot e abre o app com tokens no hash
-
-**Para rodar:**
-```bash
-# Duplo clique em:
-lista-mercado/hortisabor-bot/iniciar.command
-```
-
-**Para rodar os testes do bot:**
-```bash
-cd hortisabor-bot
-/opt/homebrew/bin/python3.11 -m pytest test_bot_state.py -v
-```
+- **Playwright locators > JS evaluate:** Para sites React/Angular, `page.locator().click()` é obrigatório. `element.click()` via evaluate funciona só para `<button>` nativos.
+- **domcontentloaded > networkidle:** Para sites com analytics persistentes.
+- **"Entregar no endereço" primeiro:** Quando o site já tem CEP salvo, esse botão aparece e é a melhor opção (entrega, não retirada).
+- **Spinner como âncora do carrinho:** `input.vip-spin__quantity` é o seletor mais estável no carrinho — sempre existe e identifica cada produto.
+- **React setter para qty:** `HTMLInputElement.prototype.value.set` + dispatch `input`/`change` é o padrão para inputs React. Não depende de botões +/-.
+- **Separação adição/quantidade:** Adiciona qty=1 por produto. Quantidades >1 ajustadas em visita única ao carrinho.
 
 ---
 
-## Próximos passos sugeridos
+## Arquivos relevantes
 
-1. Testar o bot com a correção do scroll — confirmar que os itens são adicionados ao carrinho
-2. Verificar se o `PausaModal` aparece corretamente quando há item sem URL
-3. Usar a aba Catálogo para mapear URLs dos itens mais frequentes (reduz paradas)
+- `hortisabor-bot/bot.py` — bot principal
+  - `_confirmar_modal_entrega` (cascata de cliques pós-Adicionar)
+  - `_adicionar_item` (navega + adiciona + confirma modal)
+  - `_ajustar_quantidades_no_carrinho` (parser + setter)
+- `public/data.json` — catálogo
+- `hortisabor-bot/debug_*.png` — screenshots da última execução
+
+---
+
+## Próximos passos
+
+1. **Rodar o bot** (teste 3) e verificar logs acima
+2. Se qty "200g" → "6" for rejeitada: ajustar formato (multiplicar peso × qty)
+3. Após estabilizar: Task 7 (limpeza de código morto)
+4. Deploy frontend para GitHub Pages (já pushed)

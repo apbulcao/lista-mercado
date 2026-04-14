@@ -124,6 +124,14 @@ export default function App() {
     }
   }
 
+  function handleObservacoesChange(id, obs) {
+    setListaAtual((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, observacoes: obs } : item
+      )
+    )
+  }
+
   function handleAdicionarDoCatalogo(catalogoId) {
     const itemCatalogo = dados.catalogo.find((c) => c.id === catalogoId)
     if (!itemCatalogo) return
@@ -275,10 +283,13 @@ export default function App() {
       itens: checkedItens.map((i) => ({ catalogoId: i.id, quantidade: i.quantidade })),
     }
 
-    // Add new items to catalogo
+    // Add new items to catalogo and update quantidadePadrao of existing ones
     const novosCatalogo = [...dados.catalogo]
     for (const item of checkedItens) {
-      if (!novosCatalogo.some((c) => c.id === item.id)) {
+      const existente = novosCatalogo.find((c) => c.id === item.id)
+      if (existente) {
+        existente.quantidadePadrao = item.quantidade
+      } else {
         novosCatalogo.push({
           id: item.id,
           nome: item.nome,
@@ -335,6 +346,7 @@ export default function App() {
             marca: i.marca || '',
             detalhes: i.detalhes || '',
             url_hortisabor: i.urlHortisabor || '',
+            observacoes: i.observacoes || '',
           })),
           ai_provider: getAiProvider(),
           ai_api_key: getAiApiKey(),
@@ -607,6 +619,7 @@ export default function App() {
                     onQuantidadeChange={handleQuantidadeChange}
                     onAdicionarItem={handleAdicionarDoCatalogo}
                     onUrlChange={handleUrlHortisaborChange}
+                    onObservacoesChange={handleObservacoesChange}
                   />
                 )
               })}
