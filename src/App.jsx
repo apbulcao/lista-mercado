@@ -45,6 +45,7 @@ export default function App() {
         .map((item) => ({
           ...item,
           quantidade: item.quantidadePadrao,
+          observacoes: item.observacaoPadrao || '',
           checked: true,
         }))
       setDados({ catalogo: catalogoComScores, historico: d.historico })
@@ -138,7 +139,7 @@ export default function App() {
     if (listaAtual.some((l) => l.id === catalogoId)) return
     setListaAtual((prev) => [
       ...prev,
-      { ...itemCatalogo, quantidade: itemCatalogo.quantidadePadrao, checked: true },
+      { ...itemCatalogo, quantidade: itemCatalogo.quantidadePadrao, observacoes: itemCatalogo.observacaoPadrao || '', checked: true },
     ])
   }
 
@@ -218,6 +219,7 @@ export default function App() {
             novosItensLista.push({
               ...itemExistente,
               quantidade: item.quantidadePadrao || itemExistente.quantidadePadrao,
+              observacoes: itemExistente.observacaoPadrao || '',
               checked: true,
             })
           }
@@ -283,18 +285,20 @@ export default function App() {
       itens: checkedItens.map((i) => ({ catalogoId: i.id, quantidade: i.quantidade })),
     }
 
-    // Add new items to catalogo and update quantidadePadrao of existing ones
+    // Add new items to catalogo and update quantidadePadrao/observacaoPadrao of existing ones
     const novosCatalogo = [...dados.catalogo]
     for (const item of checkedItens) {
       const existente = novosCatalogo.find((c) => c.id === item.id)
       if (existente) {
         existente.quantidadePadrao = item.quantidade
+        existente.observacaoPadrao = (item.observacoes || '').trim() || existente.observacaoPadrao || ''
       } else {
         novosCatalogo.push({
           id: item.id,
           nome: item.nome,
           categoria: item.categoria,
           quantidadePadrao: item.quantidade,
+          observacaoPadrao: (item.observacoes || '').trim(),
           unidade: '',
           detalhes: item.detalhes || '',
           marca: item.marca || '',
