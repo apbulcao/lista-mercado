@@ -484,26 +484,32 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
             if not clicou:
                 return False
 
-            # O site exige seleção de loja antes de confirmar a adição.
-            # Sem clicar na loja, o item NÃO entra no carrinho.
+            # O site exige seleção de entrega/loja antes de confirmar a adição.
+            # Sem confirmar, o item NÃO entra no carrinho.
             await page.wait_for_timeout(1500)
             confirmou = await page.evaluate("""() => {
-                // Procura botões/links com nome de loja (contém "Hortisabor")
-                const els = [...document.querySelectorAll('button, a, [role="button"], div[onclick]')];
+                const els = [...document.querySelectorAll('button, a, [role="button"], div, span')];
+                // 1. Clica em "Receber no CEP" (entrega em casa)
+                const receber = els.find(el => {
+                    const txt = (el.innerText || '').toLowerCase();
+                    return txt.includes('receber') && txt.includes('cep');
+                });
+                if (receber) { receber.click(); return 'receber_cep'; }
+                // 2. Fallback: clica na primeira loja Hortisabor
                 const loja = els.find(el => {
                     const txt = el.innerText || '';
                     return txt.toLowerCase().includes('hortisabor') &&
                            txt.length > 10 && txt.length < 200 &&
                            !txt.toLowerCase().includes('adicionar');
                 });
-                if (loja) { loja.click(); return loja.innerText.trim().substring(0, 60); }
+                if (loja) { loja.click(); return 'loja: ' + loja.innerText.trim().substring(0, 50); }
                 return null;
             }""")
             if confirmou:
-                print(f'[bot] Loja selecionada: "{confirmou}"')
+                print(f'[bot] Modal de entrega: {confirmou}')
                 await page.wait_for_timeout(2000)
             else:
-                print('[bot] AVISO: nenhum botão de loja encontrado após Adicionar')
+                print('[bot] AVISO: nenhum botão de entrega/loja encontrado')
 
             await page.screenshot(path=f'debug_{slug}_depois.png')
 
