@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getBotUrl, getBotApiKey, setBotUrl, setBotApiKey } from '../lib/botApi'
 
 const STORAGE_KEY_TOKEN = 'lista-mercado-gh-token'
 const STORAGE_KEY_REPO = 'lista-mercado-gh-repo'
@@ -18,6 +19,8 @@ export default function ConfigToken({ aberto, onFechar }) {
   const [aiProvider, setAiProvider] = useState(() => getAiProvider())
   const [aiUrl, setAiUrl] = useState(() => getAiUrl())
   const [aiKey, setAiKey] = useState(() => getAiApiKey())
+  const [botUrlLocal, setBotUrlLocal] = useState(() => getBotUrl())
+  const [botApiKeyLocal, setBotApiKeyLocal] = useState(() => getBotApiKey())
   const [salvo, setSalvo] = useState(false)
 
   if (!aberto) return null
@@ -29,6 +32,8 @@ export default function ConfigToken({ aberto, onFechar }) {
     localStorage.setItem(STORAGE_KEY_AI_URL, aiUrl.trim())
     localStorage.setItem(STORAGE_KEY_AI_KEY, aiKey.trim())
     
+    setBotUrl(botUrlLocal)
+    setBotApiKey(botApiKeyLocal)
     setSalvo(true)
     setTimeout(() => { setSalvo(false); onFechar() }, 1500)
   }
@@ -74,6 +79,20 @@ export default function ConfigToken({ aberto, onFechar }) {
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">API Key da IA</label>
                 <input type="password" value={aiKey} onChange={e => setAiKey(e.target.value)} placeholder="Sua chave de API" className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none transition-colors duration-200" style={{ border: '1px solid #E5DDD0', backgroundColor: '#F2EDE4', color: '#1C1A16' }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-gray-100">
+            <h4 className="text-sm font-bold text-[#2D6A4F] mb-3">Bot Hortisabor</h4>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">URL do Bot</label>
+                <input type="text" value={botUrlLocal} onChange={e => setBotUrlLocal(e.target.value)} placeholder="http://localhost:7430" className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none transition-colors duration-200" style={{ border: '1px solid #E5DDD0', backgroundColor: '#F2EDE4', color: '#1C1A16' }} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">API Key do Bot</label>
+                <input type="password" value={botApiKeyLocal} onChange={e => setBotApiKeyLocal(e.target.value)} placeholder="Chave de acesso" className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none transition-colors duration-200" style={{ border: '1px solid #E5DDD0', backgroundColor: '#F2EDE4', color: '#1C1A16' }} />
               </div>
             </div>
           </div>

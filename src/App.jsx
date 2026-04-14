@@ -72,6 +72,10 @@ export default function App() {
         localStorage.setItem('lista-mercado-ai-provider', 'groq')
         localStorage.setItem('lista-mercado-ai-key', groq)
       }
+      const botUrl = params.get('botUrl')
+      const botApiKey = params.get('botApiKey')
+      if (botUrl) localStorage.setItem('lista-mercado-bot-url', botUrl)
+      if (botApiKey) localStorage.setItem('lista-mercado-bot-api-key', botApiKey)
       // Limpa o hash para não expor tokens na URL
       history.replaceState(null, '', window.location.pathname + window.location.search)
     }
