@@ -558,6 +558,190 @@ async def _fechar_modal_entrega(page) -> None:
     await page.wait_for_timeout(500)
 
 
+async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> dict:
+    """Navega ao carrinho e ajusta quantidades de itens que precisam qty > 1.
+
+    Estratégia:
+    1. Encontra todos os itens no carrinho (nome + controles de qty)
+    2. Para cada item da lista com qty > 1, faz match por nome
+    3. Clica "+" até chegar na quantidade desejada
+    4. Retorna dict com resultados por item
+
+    Retorna: {'ajustados': [...], 'nao_encontrados': [...]}
+    """
+    # Filtra itens que precisam de ajuste (qty > 1)
+    itens_para_ajustar = []
+    for item in itens:
+        try:
+            qty = int(item.quantidade) if item.quantidade else 1
+        except (ValueError, TypeError):
+            qty = 1
+        if qty > 1:
+            itens_para_ajustar.append((item, qty))
+
+    if not itens_para_ajustar:
+        print('[bot] Carrinho: nenhum item precisa de ajuste de quantidade')
+        return {'ajustados': [], 'nao_encontrados': []}
+
+    print(f'[bot] Carrinho: {len(itens_para_ajustar)} item(ns) precisam ajuste de qty')
+    await page.goto(URL_CARRINHO, wait_until='networkidle', timeout=15000)
+    await _fechar_modal_se_visivel(page)
+    await page.screenshot(path='debug_carrinho_antes.png')
+
+    # Diagnóstico: mapeia itens visíveis no carrinho e seus controles
+    cart_info = await page.evaluate("""() => {
+        // Estratégia em cascata para encontrar "linhas" do carrinho
+        // Cada site organiza de forma diferente — tenta padrões comuns
+        const rows = document.querySelectorAll(
+            '[class*="cart-item"], [class*="cart_item"], [class*="carrinho"] > div, '
+          + '[class*="product-item"], [class*="item-cart"], tr[class*="item"]'
+        );
+
+        // Se seletores de classe não funcionam, tenta por estrutura:
+        // procura elementos que contêm TANTO texto de produto QUANTO botões +/-
+        let items = [];
+        const candidates = rows.length > 0
+            ? [...rows]
+            : [...document.querySelectorAll('div, li, tr')].filter(el => {
+                const text = el.innerText || '';
+                const hasPlus = el.querySelector('button')
+                    && [...el.querySelectorAll('button')].some(b =>
+                        b.innerText.trim() === '+' || b.textContent.trim() === '+');
+                const hasProductText = text.length > 20 && text.length < 500;
+                return hasPlus && hasProductText;
+              });
+
+        for (const row of candidates) {
+            // Extrai nome do produto
+            const nameEl = row.querySelector('h2, h3, h4, h5, [class*="name"], [class*="title"], [class*="descri"], a[href*="/"]');
+            const name = nameEl
+                ? nameEl.innerText.trim().split('\\n')[0].trim()
+                : row.innerText.trim().split('\\n')[0].trim();
+
+            // Extrai quantidade atual
+            const qtyInput = row.querySelector('input[type="number"], input[class*="quant"], input[class*="spin"]');
+            const qtyText = row.querySelector('[class*="quant"], [class*="qty"]');
+            const currentQty = qtyInput
+                ? qtyInput.value
+                : (qtyText ? qtyText.innerText.trim() : '?');
+
+            // Verifica se tem botão +
+            const btns = [...row.querySelectorAll('button')];
+            const hasPlus = btns.some(b => b.innerText.trim() === '+' || b.textContent.trim() === '+');
+
+            if (name && name.length > 3) {
+                items.push({ name: name.substring(0, 80), currentQty, hasPlus, hasInput: !!qtyInput });
+            }
+        }
+
+        // Fallback: se nada funcionou, retorna HTML parcial para diagnóstico
+        if (items.length === 0) {
+            const main = document.querySelector('main, [class*="content"], [class*="cart"]');
+            return {
+                items: [],
+                debug_html: (main || document.body).innerHTML.substring(0, 2000),
+                all_buttons: [...document.querySelectorAll('button')].slice(0, 20).map(b => ({
+                    text: b.innerText.trim().substring(0, 30),
+                    cls: b.className.substring(0, 40)
+                })),
+                all_inputs: [...document.querySelectorAll('input')].slice(0, 15).map(inp => ({
+                    type: inp.type, cls: inp.className.substring(0, 40), val: inp.value
+                }))
+            };
+        }
+
+        return { items, debug_html: null, all_buttons: null, all_inputs: null };
+    }""")
+
+    print(f'[bot] Carrinho: {len(cart_info.get("items", []))} item(ns) encontrados')
+    for ci in cart_info.get('items', []):
+        print(f'  - "{ci["name"]}" qty={ci["currentQty"]} plus={ci["hasPlus"]} input={ci["hasInput"]}')
+
+    if not cart_info.get('items'):
+        print(f'[bot] Carrinho: DIAGNÓSTICO — nenhum item detectado')
+        if cart_info.get('all_buttons'):
+            print(f'[bot]   Botões: {cart_info["all_buttons"][:10]}')
+        if cart_info.get('all_inputs'):
+            print(f'[bot]   Inputs: {cart_info["all_inputs"][:10]}')
+        if cart_info.get('debug_html'):
+            print(f'[bot]   HTML (trecho): {cart_info["debug_html"][:500]}')
+        await page.screenshot(path='debug_carrinho_diagnostico.png')
+        return {'ajustados': [], 'nao_encontrados': [i.nome for i, _ in itens_para_ajustar]}
+
+    # Match e ajuste de quantidades
+    ajustados = []
+    nao_encontrados = []
+
+    for item, target_qty in itens_para_ajustar:
+        # Match por nome: slug da URL vs nome no carrinho (case-insensitive, parcial)
+        slug_parts = item.url_hortisabor.rstrip('/').split('/')[-1].replace('-', ' ').lower().split() if item.url_hortisabor else []
+        nome_parts = item.nome.lower().split()
+        search_terms = slug_parts if slug_parts else nome_parts
+
+        matched_idx = None
+        best_score = 0
+        for idx, ci in enumerate(cart_info['items']):
+            cart_name_lower = ci['name'].lower()
+            score = sum(1 for term in search_terms if term in cart_name_lower)
+            if score > best_score:
+                best_score = score
+                matched_idx = idx
+
+        if matched_idx is None or best_score < 2:
+            print(f'[bot] Carrinho: "{item.nome}" não encontrado (melhor score={best_score})')
+            nao_encontrados.append(item.nome)
+            continue
+
+        ci = cart_info['items'][matched_idx]
+        print(f'[bot] Carrinho: "{item.nome}" → match "{ci["name"]}" (score={best_score})')
+
+        try:
+            current = int(ci['currentQty'])
+        except (ValueError, TypeError):
+            current = 1
+
+        clicks_needed = target_qty - current
+        if clicks_needed <= 0:
+            print(f'[bot] Carrinho: "{item.nome}" já com qty={current} (target={target_qty})')
+            ajustados.append(item.nome)
+            continue
+
+        # Clica "+" o número necessário de vezes
+        # Usa o índice do item no carrinho para achar o botão certo
+        for click_i in range(min(clicks_needed, 20)):
+            clicou = await page.evaluate("""(idx) => {
+                // Re-scan os itens do carrinho para pegar o estado atual
+                const candidates = [...document.querySelectorAll('div, li, tr')].filter(el => {
+                    const text = el.innerText || '';
+                    const hasPlus = el.querySelector('button')
+                        && [...el.querySelectorAll('button')].some(b =>
+                            b.innerText.trim() === '+' || b.textContent.trim() === '+');
+                    const hasProductText = text.length > 20 && text.length < 500;
+                    return hasPlus && hasProductText;
+                });
+
+                if (idx >= candidates.length) return false;
+                const row = candidates[idx];
+                const btns = [...row.querySelectorAll('button')];
+                const plus = btns.find(b => b.innerText.trim() === '+')
+                          || btns.find(b => b.textContent.trim() === '+');
+                if (!plus) return false;
+                plus.click();
+                return true;
+            }""", matched_idx)
+
+            if not clicou:
+                print(f'[bot] Carrinho: "+" não encontrado para "{item.nome}" (click {click_i + 1}/{clicks_needed})')
+                break
+            await page.wait_for_timeout(500)
+
+        ajustados.append(item.nome)
+        print(f'[bot] Carrinho: "{item.nome}" ajustado → target={target_qty}')
+
+    await page.screenshot(path='debug_carrinho_depois.png')
+    return {'ajustados': ajustados, 'nao_encontrados': nao_encontrados}
+
+
 async def _executar_headless(cookies, itens: list[ItemRequest], ai_config: dict) -> Optional[dict]:
     """
     Executa automação headless com cookies salvos.
