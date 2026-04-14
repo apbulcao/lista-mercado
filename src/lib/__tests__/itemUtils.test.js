@@ -25,6 +25,26 @@ describe('itemUtils', () => {
     expect(normalizarQuantidade('abc')).toBe('')
   })
 
+  it('trata peso com unidade colada como 1 unidade', () => {
+    expect(normalizarQuantidade('100g')).toBe('1')
+    expect(normalizarQuantidade('500gr')).toBe('1')
+    expect(normalizarQuantidade('200ml')).toBe('1')
+    expect(normalizarQuantidade('1kg')).toBe('1')
+    expect(normalizarQuantidade('750ml')).toBe('1')
+  })
+
+  it('preserva contagem quando unidade vem separada por espaço', () => {
+    expect(normalizarQuantidade('2 litros')).toBe('2')
+    expect(normalizarQuantidade('1 bandeja')).toBe('1')
+    expect(normalizarQuantidade('3 pacotes')).toBe('3')
+  })
+
+  it('extrai primeiro numero valido de strings mistas', () => {
+    expect(normalizarQuantidade('1 bandeja 20')).toBe('1')
+    expect(normalizarQuantidade('6')).toBe('6')
+    expect(normalizarQuantidade('10')).toBe('10')
+  })
+
   it('aceita apenas quantidades inteiras maiores que zero', () => {
     expect(quantidadeValida('1')).toBe(true)
     expect(quantidadeValida('12')).toBe(true)

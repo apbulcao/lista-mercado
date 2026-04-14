@@ -28,7 +28,10 @@ export function criarIdItem(nome, itensExistentes = []) {
 }
 
 export function normalizarQuantidade(valor) {
-  const match = String(valor ?? '').match(/[1-9]\d*/)
+  const s = String(valor ?? '').trim().toLowerCase()
+  // Peso com unidade colada ao número (100g, 500gr, 200ml, 1kg) = 1 unidade
+  if (/^\d+\s*(g|gr|kg|ml|l)\b/.test(s)) return '1'
+  const match = s.match(/[1-9]\d*/)
   return match ? match[0] : ''
 }
 
