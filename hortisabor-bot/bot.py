@@ -775,6 +775,12 @@ async def _executar_headless(cookies, itens: list[ItemRequest], ai_config: dict)
             else:
                 nao_encontrados.append(item.nome)
 
+        # Ajusta quantidades no carrinho (itens com qty > 1)
+        itens_adicionados = [item for item in itens if item.nome in encontrados]
+        if itens_adicionados:
+            resultado_cart = await _ajustar_quantidades_no_carrinho(page, itens_adicionados)
+            print(f'[bot] Carrinho: ajustados={resultado_cart["ajustados"]} nao_encontrados={resultado_cart["nao_encontrados"]}')
+
         return {'encontrados': encontrados, 'nao_encontrados': nao_encontrados}
 
     except Exception as e:
@@ -833,6 +839,12 @@ async def _processar_montagem(itens: list[ItemRequest], cookies: list, ai_config
                 _montagem.nao_encontrados.append(item.nome)
 
             _montagem.progresso['feitos'] += 1
+
+        # Ajusta quantidades no carrinho
+        itens_adicionados = [item for item in itens if item.nome in _montagem.encontrados]
+        if itens_adicionados:
+            resultado_cart = await _ajustar_quantidades_no_carrinho(page, itens_adicionados)
+            print(f'[bot] Carrinho: ajustados={resultado_cart["ajustados"]}')
 
         _montagem.estado = 'concluido'
 
