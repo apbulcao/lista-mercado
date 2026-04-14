@@ -401,7 +401,7 @@ async def _ajustar_qtd_no_carrinho(page, quantidade: str, nome_item: str) -> boo
         return True
 
     print(f'[bot] Carrinho: ajustando "{nome_item}" → qty={qty}')
-    await page.goto(URL_CARRINHO, wait_until='networkidle', timeout=15000)
+    await page.goto(URL_CARRINHO, wait_until='domcontentloaded', timeout=15000)
     await _fechar_modal_se_visivel(page)
 
     # Encontra spinners de quantidade — tenta seletores em cascata
@@ -467,7 +467,13 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
         # IA não é usada neste caminho: a URL já identifica o produto exato.
         if item.url_hortisabor:
             print(f'[bot] URL direta: {item.url_hortisabor}')
-            await page.goto(item.url_hortisabor, wait_until='networkidle', timeout=15000)
+            await page.goto(item.url_hortisabor, wait_until='domcontentloaded', timeout=15000)
+            # Espera o botão Adicionar renderizar (mais confiável que networkidle)
+            try:
+                await page.locator('button', has_text='Adicionar').first.wait_for(
+                    state='visible', timeout=10000)
+            except Exception:
+                pass
             await _fechar_modal_se_visivel(page)
 
             n_btns = await page.locator('button', has_text='Adicionar').count()
@@ -486,35 +492,20 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
 
             # O site exige seleção de entrega/loja antes de confirmar a adição.
             # Sem confirmar, o item NÃO entra no carrinho.
+            # Usa Playwright locators (clique real) em vez de JS evaluate
+            # porque element.click() não dispara handlers React do site.
             await page.wait_for_timeout(1500)
-            confirmou = await page.evaluate("""() => {
-                const els = [...document.querySelectorAll('button, a, [role="button"], div, span')];
-                // 1. Clica em "Receber no CEP" (entrega em casa)
-                const receber = els.find(el => {
-                    const txt = (el.innerText || '').toLowerCase();
-                    return txt.includes('receber') && txt.includes('cep');
-                });
-                if (receber) { receber.click(); return 'receber_cep'; }
-                // 2. Fallback: clica na primeira loja Hortisabor
-                const loja = els.find(el => {
-                    const txt = el.innerText || '';
-                    return txt.toLowerCase().includes('hortisabor') &&
-                           txt.length > 10 && txt.length < 200 &&
-                           !txt.toLowerCase().includes('adicionar');
-                });
-                if (loja) { loja.click(); return 'loja: ' + loja.innerText.trim().substring(0, 50); }
-                return null;
-            }""")
+            confirmou = await _confirmar_modal_entrega(page)
             if confirmou:
                 print(f'[bot] Modal de entrega: {confirmou}')
-                await page.wait_for_timeout(2000)
             else:
-                print('[bot] AVISO: nenhum botão de entrega/loja encontrado')
+                await page.screenshot(path=f'debug_{slug}_modal_falhou.png')
+                print('[bot] AVISO: modal de entrega não confirmado')
 
             await page.screenshot(path=f'debug_{slug}_depois.png')
 
             # Navega de volta ao home
-            await page.goto(URL_HOME, wait_until='networkidle', timeout=15000)
+            await page.goto(URL_HOME, wait_until='domcontentloaded', timeout=15000)
             await _fechar_modal_se_visivel(page)
             return True
 
@@ -584,6 +575,61 @@ async def _fechar_modal_entrega(page) -> None:
     await page.wait_for_timeout(500)
 
 
+async def _confirmar_modal_entrega(page) -> Optional[str]:
+    """Confirma seleção de entrega/loja no modal pós-Adicionar.
+
+    Usa Playwright locators (simula clique real do mouse) porque
+    JS evaluate element.click() não dispara handlers React do site.
+
+    Estratégia em cascata:
+    1. Clica na primeira loja Hortisabor (opção mais simples — 1 clique)
+    2. Tenta botões comuns (Retirar, Confirmar)
+    3. Se nada funcionar, loga diagnóstico
+    """
+    # 1. Tenta clicar na primeira loja pelo endereço
+    for texto_loja in ['Tabapuã', 'Luis Ju']:
+        try:
+            el = page.get_by_text(texto_loja, exact=False).first
+            if await el.is_visible(timeout=800):
+                await el.click()
+                await page.wait_for_timeout(1500)
+                return f'loja:{texto_loja}'
+        except Exception:
+            continue
+
+    # 2. Tenta botões com texto relevante
+    for texto_btn in ['Retirar', 'Confirmar', 'Selecionar', 'Continuar']:
+        try:
+            btn = page.locator('button', has_text=texto_btn).first
+            if await btn.is_visible(timeout=500):
+                await btn.click()
+                await page.wait_for_timeout(1500)
+                return f'botao:{texto_btn}'
+        except Exception:
+            continue
+
+    # 3. Tenta clicar em qualquer elemento com "Hortisabor" (card genérico)
+    try:
+        el = page.get_by_text('Hortisabor', exact=False).first
+        if await el.is_visible(timeout=500):
+            await el.click()
+            await page.wait_for_timeout(1500)
+            return 'loja:hortisabor'
+    except Exception:
+        pass
+
+    # 4. Diagnóstico: loga elementos clicáveis visíveis no modal
+    diag = await page.evaluate("""() => {
+        const els = [...document.querySelectorAll('button, a, [role="button"]')]
+            .filter(el => el.offsetParent !== null)
+            .slice(0, 15)
+            .map(el => el.tagName + ': ' + (el.innerText||'').trim().substring(0, 50));
+        return els;
+    }""")
+    print(f'[bot] Modal diagnóstico — elementos clicáveis: {diag}')
+    return None
+
+
 async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> dict:
     """Navega ao carrinho e ajusta quantidades de itens que precisam qty > 1.
 
@@ -610,7 +656,8 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
         return {'ajustados': [], 'nao_encontrados': []}
 
     print(f'[bot] Carrinho: {len(itens_para_ajustar)} item(ns) precisam ajuste de qty')
-    await page.goto(URL_CARRINHO, wait_until='networkidle', timeout=15000)
+    await page.goto(URL_CARRINHO, wait_until='domcontentloaded', timeout=15000)
+    await page.wait_for_timeout(2000)  # Aguarda renderização dos itens do carrinho
     await _fechar_modal_se_visivel(page)
     await page.screenshot(path='debug_carrinho_antes.png')
 
@@ -618,8 +665,10 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
     cart_info = await page.evaluate("""() => {
         // Estratégia em cascata para encontrar "linhas" do carrinho
         // Cada site organiza de forma diferente — tenta padrões comuns
+        // NB: NÃO usar [class*="carrinho"] > div — pega divs estruturais
+        // (ex: título "Carrinho") que bypassam o filtro hasPlus
         const rows = document.querySelectorAll(
-            '[class*="cart-item"], [class*="cart_item"], [class*="carrinho"] > div, '
+            '[class*="cart-item"], [class*="cart_item"], '
           + '[class*="product-item"], [class*="item-cart"], tr[class*="item"]'
         );
 
