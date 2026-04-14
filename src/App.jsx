@@ -3,7 +3,6 @@ import {
   carregarDados,
   salvarDados,
   salvarDadosPendentes,
-  limparDadosPendentes,
   CATEGORIAS,
   SCORE_THRESHOLD,
 } from './lib/data'
@@ -314,20 +313,20 @@ export default function App() {
     // Update local state
     setDados(novosDados)
 
+    // Salva snapshot local como buffer (protege contra refresh antes do deploy)
+    salvarDadosPendentes(novosDados)
+
     // Try to save to GitHub
     const token = getToken()
     const repo = getRepo()
     if (token && repo) {
       try {
         await salvarDados(novosDados, token, repo)
-        limparDadosPendentes()
         alert('Lista confirmada e salva!')
       } catch (err) {
-        salvarDadosPendentes(novosDados)
         alert(`Lista confirmada e salva neste dispositivo, mas houve erro ao salvar no GitHub: ${err.message}`)
       }
     } else {
-      salvarDadosPendentes(novosDados)
       alert('Lista confirmada e salva neste dispositivo. Configure o GitHub nas ⚙️ para sincronizar permanentemente.')
     }
   }
