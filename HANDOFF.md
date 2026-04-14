@@ -1,79 +1,92 @@
 # HANDOFF — lista-mercado
-**Data:** 2026-04-13 (sessão 3)
+**Data:** 2026-04-13 (sessão 4)
 **Branch:** `main`
 
 ---
 
 ## O que foi feito nesta sessão
 
-### Brainstorm + design + plano
-- Spec: `docs/superpowers/specs/2026-04-13-catalogo-url-hortisabor-design.md`
-- Plano: `docs/superpowers/plans/2026-04-13-catalogo-url-hortisabor.md`
-
-### Implementado (Tasks 1 e 2 — backend)
+### Tasks 3–6 implementadas (plano `2026-04-13-catalogo-url-hortisabor.md`)
 
 | Commit | O que fez |
 |--------|-----------|
-| `095a9b5` | `_MontagemState` + `/iniciar-montagem` com background task |
-| `a749333` | Fix `import asyncio` + `/status` expandido + `/fornecer-url` |
+| `dd17588` | `Catalogo.jsx` — duas colunas sem/com URL com edição inline |
+| `e140030` | Fix `Catalogo.jsx` — default prop + testes Escape e catálogo completo |
+| `ad34ab5` | `AdicionarItemNovo.jsx` — campo URL Hortisabor opcional |
+| `3b53877` | `PausaModal.jsx` — modal de pausa durante compra |
+| `2731881` | `App.jsx` — aba catálogo, polling de montagem, PausaModal |
+| `b7dc26e` | Fix `App.jsx` — cleanup polling, race condition, try/catch |
 
-**`hortisabor-bot/bot.py` — mudanças:**
-- `ItemRequest` ganhou campo `id: str = ''`
-- Nova classe `_MontagemState` (estados: idle/processando/aguardando_url/concluido/erro)
-- Novo `_processar_montagem()` — background task asyncio que pausa com `asyncio.Event` quando item sem URL
-- `/montar-carrinho` substituído por `/iniciar-montagem` (retorna imediatamente, task roda em background)
-- `/status` expandido: retorna bloco `montagem` com estado completo
-- Novo `/fornecer-url` — desbloqueia a background task com a URL fornecida
+### Setup automático de tokens
+- `903935b` — `App.jsx` lê params de setup no hash da URL (`#setup&token=X&repo=Y&groq=Z`), salva no localStorage e limpa a URL
+- `hortisabor-bot/iniciar.command` atualizado para ler `.tokens` e abrir a URL com params
+- `.tokens` criado (gitignored) em `lista-mercado/.tokens` com GitHub token e Groq key
 
-**Testes:** `hortisabor-bot/test_bot_state.py` — 6/6 passando
-
----
-
-## Pendente (Tasks 3–6 do plano)
-
-Tasks prontas para executar — estão detalhadas com código completo no plano:
-
-| Task | Arquivo | O que faz |
-|------|---------|-----------|
-| 3 | `src/components/Catalogo.jsx` (criar) | Aba catálogo — duas colunas sem/com URL, edição inline |
-| 4 | `src/components/AdicionarItemNovo.jsx` (modificar) | Campo URL opcional no formulário |
-| 5 | `src/components/PausaModal.jsx` (criar) | Modal de pausa durante compra com campo URL |
-| 6 | `src/App.jsx` (modificar) | Nova aba Catálogo, polling de montagem, PausaModal |
-
-**Para executar:** leia o plano `docs/superpowers/plans/2026-04-13-catalogo-url-hortisabor.md` e use subagent-driven-development starting from Task 3.
+### Fix bot — botão Adicionar oculto
+- `64f0bb9` — Hortisabor mudou layout: botão "Adicionar" ficava fora do viewport (hidden para Playwright)
+- Fix: `scroll_into_view_if_needed()` + `click(force=True)` em vez de `wait_for(state='visible')`
+- **Não testado ainda** — bot foi corrigido mas ainda não houve run bem-sucedido confirmado
 
 ---
 
-## Arquitetura atual do bot (após Tasks 1-2)
+## Estado atual do frontend
 
+**Novas features:**
+- Aba **Catálogo** no header (entre Lista e Histórico) — mostra todos os itens em duas colunas (sem/com URL), com barra de cobertura e edição inline de URL
+- Formulário **Adicionar item** tem campo URL opcional (Hortisabor)
+- **PausaModal** — aparece quando bot encontra item sem URL durante montagem; usuário cola a URL e o bot retoma
+- Fluxo de montagem é assíncrono: `POST /iniciar-montagem` → polling `/status` a 1s → modal ou resultado
+
+**Suite de testes:** 82 testes passando
+
+---
+
+## Estado atual do bot (`hortisabor-bot/bot.py`)
+
+**Endpoints disponíveis:**
+- `GET /status` — retorna estado de montagem (idle/processando/aguardando_url/concluido/erro)
+- `POST /iniciar-montagem` — inicia background task com os itens
+- `POST /fornecer-url` — desbloqueia background task com URL fornecida pelo usuário
+
+**Fluxo:**
 ```
 App → POST /iniciar-montagem
   → bot spawna _processar_montagem em background
-  → retorna {"status": "iniciado"} imediatamente
+  → retorna {"status": "iniciado"}
 
 App polling GET /status a cada 1s
-  → {ok, montagem: {estado, item_atual, item_id, progresso, ...}}
-  → se estado=="aguardando_url": app mostra PausaModal
+  → se aguardando_url: mostra PausaModal
+  → se concluido: mostra link do carrinho
 
 App → POST /fornecer-url {item_id, url}
   → bot retoma background task
-
-App polling → estado=="concluido" → mostra resultado
 ```
+
+**Bug conhecido resolvido:** botão "Adicionar" no site do Hortisabor estava hidden para Playwright — corrigido com scroll + force click.
 
 ---
 
-## Para rodar o bot
+## Arquivos de configuração
 
+- `.tokens` — GitHub token + Groq key (gitignored, em `lista-mercado/.tokens`)
+- `hortisabor-bot/iniciar.command` — lê `.tokens`, sobe o bot e abre o app com tokens no hash
+
+**Para rodar:**
 ```bash
-cd hortisabor-bot
-/opt/homebrew/bin/python3.11 -m uvicorn bot:app --host 127.0.0.1 --port 7430
-# ou duplo clique em iniciar.command
+# Duplo clique em:
+lista-mercado/hortisabor-bot/iniciar.command
 ```
 
-## Para rodar os testes do bot
-
+**Para rodar os testes do bot:**
 ```bash
 cd hortisabor-bot
 /opt/homebrew/bin/python3.11 -m pytest test_bot_state.py -v
 ```
+
+---
+
+## Próximos passos sugeridos
+
+1. Testar o bot com a correção do scroll — confirmar que os itens são adicionados ao carrinho
+2. Verificar se o `PausaModal` aparece corretamente quando há item sem URL
+3. Usar a aba Catálogo para mapear URLs dos itens mais frequentes (reduz paradas)
