@@ -1,87 +1,96 @@
 # HANDOFF — lista-mercado
-**Data:** 2026-04-14 (sessão 10)
+**Data:** 2026-04-14 (sessão 11)
 **Branch:** `main`
-**Commit:** `dabe3a0`
+**Commit:** `6030d53`
 
 ---
 
 ## O que foi feito nesta sessão
 
-### Fix: normalizarQuantidade peso+unidade
-- Valores como "100g", "500gr", "200ml" agora retornam "1" (peso do produto, não contagem)
-- Antes: `normalizarQuantidade("100g")` → `"100"` — causava peito de peru com qty=100
-- Depois: `normalizarQuantidade("100g")` → `"1"`
-- Regex guard: `/^\d+\s*(g|gr|kg|ml|l)\b/` no início da função
-- Testes adicionados para peso+unidade, contagem separada, strings mistas
+### Fix: CRLF nos .bat para Windows
+- `instalar.bat` e `iniciar.bat` tinham line endings Unix (LF) — CMD do Windows quebrava
+- Convertidos para CRLF, criado `.gitattributes` para forçar CRLF em `*.bat`/`*.env`
+- Trocou `pip`/`playwright`/`uvicorn` por `python -m ...` (mais robusto quando Scripts/ não está no PATH)
+- Adicionado `pause` no final do `iniciar.bat` para não fechar silenciosamente
+- Atualizado `instalar.bat` com instruções para Microsoft Store (sem admin)
+- `pip install --user` para não precisar de admin
 
-### Feat: auto-fill nome via URL Hortisabor
-- Nova função `extrairNomeDaUrl` em `itemUtils.js`
-- Extrai slug da URL e converte kebab-case → title case
-- Ex: `/produto/35347/peito-peru-perdigao-defumado-100gr` → "Peito Peru Perdigao Defumado 100gr"
-- Wired no componente `AdicionarItemNovo`: ao colar URL, nome é preenchido automaticamente
-- Nome continua editável após auto-fill
+### Limpeza git
+- Removidos: 5 docs superpowers, 4 arquivos de teste bot, `descobrir_seletores.py` (commit `4bfc47b`)
+- Worktree `feat-hortisabor-bot` removido + branch deletada
+- `.gitignore` atualizado: bloqueia `tokens.env` e `bug-*.jpeg/png`
 
-### Feat: observações persistentes (observacaoPadrao)
-- Novo campo `observacaoPadrao` no catálogo (mesmo padrão de `quantidadePadrao`)
-- Salvo em `handleConfirmar` quando lista é confirmada
-- Carregado em `carregarApp`, `handleAdicionarDoCatalogo`, `handleSmartInputItems`
-- Persiste entre sessões via data.json (GitHub) e localStorage (buffer)
+### Deploy do bot no Hetzner (Tasks 1-9)
+**Motivação:** PC da Analu é corporativo, sem permissão de admin/instalação. Bot precisa rodar remotamente.
 
-### Fix: localStorage buffer após salvar
-- `limparDadosPendentes()` era chamado imediatamente após push via API
-- Deploy do GitHub Pages leva ~2min → hard-refresh no intervalo perdia dados
-- Fix: `salvarDadosPendentes` sempre mantém snapshot local como buffer
-- Buffer ignorado automaticamente quando deploy remoto atualiza (comparação de historico.length)
+**Infra criada:**
+- DuckDNS: `listamercado.duckdns.org` → `46.62.253.237` (token: `738cce89-3fc2-4689-bf6a-9e6048fd1248`)
+- Caddy reverse proxy com HTTPS automático (Let's Encrypt)
+- UFW: portas 80 e 443 abertas
+- systemd service: `hortisabor-bot.service`
 
-### Bot: diagnóstico de observações no carrinho
-- Adicionado scroll + wait (800ms) antes de buscar link de observação
-- Adicionado logging diagnóstico: quando não encontra o botão, loga elementos clicáveis em cada nível do DOM
-- **Ainda não testado** — precisa rodar bot e verificar logs
+**Código alterado (6 commits: `9fa95cb`..`6030d53`):**
+- `src/lib/botApi.js` — novo: `getBotUrl()`, `getBotApiKey()`, `botFetch()` helper
+- `src/App.jsx` — 5x `localhost:7430` substituídos por `botFetch('/...')` + setup hash lê `botUrl`/`botApiKey`
+- `src/components/ConfigToken.jsx` — seção "Bot Hortisabor" com URL e API Key
+- `hortisabor-bot/session.py` — path de cookies cross-platform (Windows + Linux)
+- `hortisabor-bot/auth.py` — novo: middleware Bearer token (desativado se BOT_API_KEY vazio)
+- `hortisabor-bot/login.py` — novo: login headless com email/senha (substitui reauth visual)
+- `hortisabor-bot/bot.py` — removido todo o reauth visual, adicionado `/health` endpoint
 
-### Limpeza local + pacote Windows
-- Removidos: `superpowers_temp/`, `.superpowers/`, `__pycache__/`, debug screenshots, `descobrir_seletores.py`, `test_bot_state.py`, `pytest.ini`, `tokens.env.rtf`
-- Criado `~/Desktop/hortisabor-bot.zip` com pacote para Windows:
-  - `instalar.bat` — instala Python + deps + Chromium
-  - `iniciar.bat` — lê tokens.env, abre browser com setup URL, inicia bot
-  - `tokens.env` — GH_TOKEN + GH_REPO + GROQ_KEY
-
----
-
-## Estado atual
-
-### Observações no carrinho do bot
-- ⏳ Diagnóstico adicionado mas não testado
-- O log vai mostrar elementos clicáveis ao redor de cada item quando "sem botão de observação"
-- Risco: o link pode não existir para certos itens, ou pode ser lazy-loaded
-
-### Pacote Windows
-- ✅ Zip criado em ~/Desktop/hortisabor-bot.zip
-- Precisa testar no Windows da esposa
+**Deploy no Hetzner:**
+- Bot em `/opt/hortisabor-bot/` com venv Python
+- Playwright + Chromium ARM64 instalados
+- `.env` em `/root/.hortisabor-bot/.env` (chmod 600)
+- Service rodando: `systemctl status hortisabor-bot`
 
 ---
 
-## Decisões de arquitetura
+## BUG EM ABERTO: app não detecta bot como online
 
-- **observacaoPadrao no catálogo (não no histórico):** Observação é um default per-item, como quantidadePadrao. Não recalculada do histórico.
-- **localStorage como buffer permanente:** Não limpar após save resolve race condition com deploy do Pages. Buffer descartado automaticamente quando remote alcança.
-- **Nome via slug (não fetch):** Extrair do slug da URL evita CORS e chamadas de rede. Title-case é suficiente.
-- **normalizarQuantidade com guard de peso:** Regex no início detecta peso+unidade colada. Tudo que não é peso segue lógica anterior.
+### Sintoma
+O app no celular mostra "Serviço não encontrado" ao clicar "Pedir no Hortisabor", mesmo com as configurações corretas salvas (URL do bot + API key visíveis no modal de settings).
+
+### O que JÁ FOI VERIFICADO (tudo OK)
+1. **Servidor acessível:** `curl https://listamercado.duckdns.org/health` → `{"ok":true}`
+2. **Auth funciona:** `curl -H "Authorization: Bearer <key>" https://listamercado.duckdns.org/status` → 200 com dados
+3. **CORS correto:** Preflight com `Origin: https://apbulcao.github.io` + `Access-Control-Request-Headers: Authorization` retorna headers corretos
+4. **Código deployado:** Bundle no GitHub Pages contém `botFetch`, `botUrl`, `lista-mercado-bot-url` (verificado via curl do JS bundle)
+5. **Settings salvos:** Screenshot confirma URL e API Key preenchidos no modal
+
+### O que NÃO FOI VERIFICADO (próximo passo)
+- **Console do browser:** Precisa abrir DevTools no celular (ou testar no Mac) para ver o erro real — pode ser mixed content, CORS na prática, encoding do token, etc.
+- **Estado do `botOnline`:** O `checarBot` useEffect roda a cada 5s e chama `botFetch('/status')`. Se falha, `setBotOnline(false)`.
+- **Diferença entre `botOnline` e `pedidoStatus`:** "Serviço não encontrado" vem de `pedidoStatus === 'error'`, que é setado quando o fetch de `iniciar-montagem` falha. Pode ser que o `botOnline` esteja true mas o POST falhou.
+
+### Como debugar na próxima sessão
+1. Abrir `http://localhost:5173/lista-mercado/` no Mac com DevTools
+2. Setar localStorage: `lista-mercado-bot-url` = `https://listamercado.duckdns.org` e `lista-mercado-bot-api-key` = `e813a6aa2d889b50a9b553937ef8e20c960ec0a509218d6ac2a69010ed0aad10`
+3. Recarregar e observar Console + Network tab
+4. Verificar se `botFetch('/status')` retorna 200 ou falha
+5. Se `/status` funciona, testar `botFetch('/iniciar-montagem', ...)` com POST
+
+---
+
+## Credenciais e tokens (referência)
+
+- **BOT_API_KEY:** `e813a6aa2d889b50a9b553937ef8e20c960ec0a509218d6ac2a69010ed0aad10`
+- **DuckDNS token:** `738cce89-3fc2-4689-bf6a-9e6048fd1248`
+- **Hetzner SSH:** `ssh hetzner` (key `~/.ssh/hetzner`, IP `46.62.253.237`)
+- **Bot service:** `systemctl restart/status/stop hortisabor-bot`
+- **Bot logs:** `journalctl -u hortisabor-bot -f`
+- **Caddy config:** `/etc/caddy/Caddyfile`
 
 ---
 
 ## Arquivos relevantes
 
-- `src/lib/itemUtils.js` — `normalizarQuantidade` (fix), `extrairNomeDaUrl` (novo)
-- `src/components/AdicionarItemNovo.jsx` — `handleUrlChange` (auto-fill)
-- `src/App.jsx` — `observacaoPadrao` em 4 pontos + buffer localStorage
-- `hortisabor-bot/bot.py` — diagnóstico de observações (scroll + log)
-- `hortisabor-bot/iniciar.bat` — lê tokens.env e abre browser com setup URL
-- `hortisabor-bot/instalar.bat` — instalação Python + deps + Chromium
-
----
-
-## Próximos passos
-
-1. **Testar observações no bot** — rodar bot com obs e verificar logs diagnósticos
-2. **Testar pacote Windows** — instalar na máquina da esposa
-3. **Limpeza git** — arquivos deletados localmente (descobrir_seletores, tests, pytest.ini) ainda tracked no repo
+- `src/lib/botApi.js` — helper de fetch com URL configurável
+- `src/App.jsx:60-83` — setup hash parsing + checarBot poll
+- `src/App.jsx:702-713` — mensagem "Serviço não encontrado"
+- `src/components/ConfigToken.jsx` — settings modal com seção Bot Hortisabor
+- `hortisabor-bot/auth.py` — API key middleware
+- `hortisabor-bot/login.py` — login programático
+- `hortisabor-bot/bot.py` — endpoints /health, /status, /iniciar-montagem
+- `docs/superpowers/specs/2026-04-14-bot-hetzner-deploy-design.md` — spec
+- `docs/superpowers/plans/2026-04-14-bot-hetzner-deploy.md` — plano de implementação
