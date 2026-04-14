@@ -32,8 +32,8 @@ export default function ConfigToken({ aberto, onFechar }) {
     localStorage.setItem(STORAGE_KEY_AI_URL, aiUrl.trim())
     localStorage.setItem(STORAGE_KEY_AI_KEY, aiKey.trim())
     
-    setBotUrl(botUrlLocal)
-    setBotApiKey(botApiKeyLocal)
+    setBotUrl(botUrlLocal.trim().replace(/\/+$/, ''))
+    setBotApiKey(botApiKeyLocal.trim())
     setSalvo(true)
     setTimeout(() => { setSalvo(false); onFechar() }, 1500)
   }

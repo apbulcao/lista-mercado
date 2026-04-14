@@ -2,11 +2,12 @@ const STORAGE_KEY_BOT_URL = 'lista-mercado-bot-url'
 const STORAGE_KEY_BOT_API_KEY = 'lista-mercado-bot-api-key'
 
 export function getBotUrl() {
-  return localStorage.getItem(STORAGE_KEY_BOT_URL) || 'http://localhost:7430'
+  const raw = localStorage.getItem(STORAGE_KEY_BOT_URL) || 'http://localhost:7430'
+  return raw.trim().replace(/\/+$/, '')
 }
 
 export function getBotApiKey() {
-  return localStorage.getItem(STORAGE_KEY_BOT_API_KEY) || ''
+  return (localStorage.getItem(STORAGE_KEY_BOT_API_KEY) || '').trim()
 }
 
 export function setBotUrl(url) {
