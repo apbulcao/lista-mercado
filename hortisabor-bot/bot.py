@@ -304,28 +304,190 @@ async def _fechar_modal_se_visivel(page) -> None:
         pass
 
 
+async def _js_preencher_quantidade(page, quantidade: str) -> bool:
+    """Preenche input de quantidade via JS com eventos React-compatíveis.
+
+    O React intercepta o setter nativo do <input> — por isso não basta
+    setar input.value diretamente. É preciso usar o setter original do
+    protótipo antes de disparar os eventos sintéticos.
+    """
+    return await page.evaluate(f"""() => {{
+        const input = document.querySelector('{SEL_QUANTIDADE}');
+        if (!input) return false;
+        const setter = Object.getOwnPropertyDescriptor(
+            window.HTMLInputElement.prototype, 'value'
+        ).set;
+        setter.call(input, '{quantidade}');
+        input.dispatchEvent(new Event('input',  {{bubbles: true}}));
+        input.dispatchEvent(new Event('change', {{bubbles: true}}));
+        return true;
+    }}""")
+
+
+async def _js_clicar_adicionar(page) -> bool:
+    """Clica no botão de adicionar ao carrinho via JS.
+
+    Usa innerText (visível ao usuário) em vez de textContent (inclui nós ocultos).
+    Tenta correspondência em cascata para cobrir variações do site:
+      1. Texto exato 'Adicionar' (resultados de busca)
+      2. Contém 'adicionar ao carrinho' (página de produto)
+      3. Começa com 'adicionar' (qualquer variação futura)
+    """
+    return await page.evaluate("""() => {
+        const btns = [...document.querySelectorAll('button')];
+        const btn = btns.find(b => b.innerText.trim() === 'Adicionar')
+                 || btns.find(b => b.innerText.toLowerCase().includes('adicionar ao carrinho'))
+                 || btns.find(b => b.innerText.toLowerCase().startsWith('adicionar'));
+        if (!btn) return false;
+        btn.click();
+        return true;
+    }""")
+
+
+async def _incrementar_quantidade_spinner(page, quantidade: str) -> bool:
+    """Tenta ajustar quantidade via spinner na página atual (funciona em listagens).
+
+    Retorna False se o spinner não aparecer — nesse caso usar _ajustar_qtd_no_carrinho.
+    """
+    try:
+        qty = int(quantidade)
+    except (ValueError, TypeError):
+        return True
+    if qty <= 1:
+        return True
+
+    # Aguarda spinner aparecer — timeout curto porque em página de produto ele não existe
+    try:
+        await page.locator(SEL_QUANTIDADE).first.wait_for(state='visible', timeout=2000)
+    except Exception:
+        print(f'[bot] Spinner não apareceu na página de produto — tentando carrinho')
+        return False
+
+    incrementos = qty - 1
+    for i in range(incrementos):
+        clicou = await page.evaluate(f"""() => {{
+            const input = document.querySelector('{SEL_QUANTIDADE}');
+            if (!input) return false;
+            const container = input.closest('[class*="spin"]') || input.parentElement;
+            if (!container) return false;
+            const btns = [...container.querySelectorAll('button')];
+            const plus = btns.find(b => b.innerText.trim() === '+')
+                      || btns.find(b => /increment|plus|mais/i.test(b.className + (b.getAttribute('aria-label') || '')))
+                      || btns[btns.length - 1];
+            if (!plus) return false;
+            plus.click();
+            return true;
+        }}""")
+        if not clicou:
+            print(f'[bot] Botão + não encontrado (iteração {i + 1}/{incrementos})')
+            break
+        await page.wait_for_timeout(300)
+
+    valor_final = await page.evaluate(f"() => document.querySelector('{SEL_QUANTIDADE}')?.value")
+    print(f'[bot] Spinner: esperado={quantidade} final={valor_final} {"✓" if str(valor_final) == str(quantidade) else "✗ diverge"}')
+    return True
+
+
+async def _ajustar_qtd_no_carrinho(page, quantidade: str, nome_item: str) -> bool:
+    """Fallback: navega ao carrinho e ajusta a quantidade do item recém-adicionado.
+
+    Usa o último spinner visível no carrinho (item mais recente fica no final da lista).
+    """
+    try:
+        qty = int(quantidade)
+    except (ValueError, TypeError):
+        return True
+    if qty <= 1:
+        return True
+
+    print(f'[bot] Carrinho: ajustando "{nome_item}" → qty={qty}')
+    await page.goto(URL_CARRINHO, wait_until='networkidle', timeout=15000)
+    await _fechar_modal_se_visivel(page)
+
+    # Encontra spinners de quantidade — tenta seletores em cascata
+    sel_usado = None
+    for sel in ['input.vip-spin__quantity', 'input[class*="spin"]', 'input[class*="quant"]', 'input[type="number"]']:
+        n = await page.locator(sel).count()
+        if n > 0:
+            sel_usado = sel
+            print(f'[bot] Carrinho: {n} spinner(s) via "{sel}"')
+            break
+
+    if not sel_usado:
+        # Debug: loga todos os inputs para diagnóstico
+        inputs_info = await page.evaluate("""() =>
+            [...document.querySelectorAll('input')].slice(0, 10).map(inp => ({
+                type: inp.type, cls: inp.className.substring(0, 50), val: inp.value
+            }))
+        """)
+        print(f'[bot] Carrinho: nenhum spinner — inputs disponíveis: {inputs_info}')
+        return False
+
+    # Usa o último spinner — item mais recentemente adicionado
+    spinner = page.locator(sel_usado).last
+    valor_atual = int(await spinner.input_value() or '1')
+    incrementos = qty - valor_atual
+
+    if incrementos <= 0:
+        print(f'[bot] Carrinho: "{nome_item}" já com qty={valor_atual}')
+        return True
+
+    for i in range(incrementos):
+        clicou = await page.evaluate(f"""() => {{
+            const all = [...document.querySelectorAll('{sel_usado}')];
+            const input = all[all.length - 1];
+            if (!input) return false;
+            const container = input.closest('[class*="spin"]') || input.parentElement;
+            if (!container) return false;
+            const btns = [...container.querySelectorAll('button')];
+            const plus = btns.find(b => b.innerText.trim() === '+')
+                      || btns.find(b => /increment|plus|mais/i.test(b.className + (b.getAttribute('aria-label') || '')))
+                      || btns[btns.length - 1];
+            if (!plus) return false;
+            plus.click();
+            return true;
+        }}""")
+        if not clicou:
+            print(f'[bot] Carrinho: botão + não encontrado ({i + 1}/{incrementos})')
+            break
+        await page.wait_for_timeout(400)
+
+    valor_final = await spinner.input_value()
+    ok = valor_final == str(qty)
+    print(f'[bot] Carrinho: "{nome_item}" esperado={qty} final={valor_final} {"✓" if ok else "✗ diverge"}')
+    return ok
+
+
 async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) -> bool:
     """Busca um item e adiciona ao carrinho. Retorna True se encontrado."""
     try:
         await _fechar_modal_se_visivel(page)
 
-        # Navegação direta se URL do produto for conhecida
+        # Navegação direta se URL do produto for conhecida.
+        # IA não é usada neste caminho: a URL já identifica o produto exato.
         if item.url_hortisabor:
             print(f'[bot] URL direta: {item.url_hortisabor}')
             await page.goto(item.url_hortisabor, wait_until='networkidle', timeout=15000)
             await _fechar_modal_se_visivel(page)
-            btn = page.locator('button', has_text='Adicionar').first
-            # Rola até o botão (pode estar fora do viewport) e clica com force
-            # para contornar visibilidade CSS sem mudar o comportamento real
-            await btn.scroll_into_view_if_needed(timeout=8000)
-            await page.wait_for_timeout(500)
-            if item.quantidade and item.quantidade not in ('', '1'):
-                qtd_input = page.locator(SEL_QUANTIDADE).first
-                if await qtd_input.is_visible():
-                    await qtd_input.fill(item.quantidade)
-            await btn.click(force=True)
-            await page.wait_for_timeout(1000)
-            await _fechar_modal_se_visivel(page)
+
+            n_btns = await page.locator('button', has_text='Adicionar').count()
+            print(f'[bot] Botões "Adicionar" encontrados: {n_btns}')
+            slug = item.url_hortisabor.rstrip('/').split('/')[-1][:40]
+            await page.screenshot(path=f'debug_{slug}_antes.png')
+
+            if n_btns == 0:
+                print(f'[bot] AVISO: nenhum botão Adicionar — produto indisponível?')
+                return False
+
+            clicou = await _js_clicar_adicionar(page)
+            print(f'[bot] Clique "Adicionar": {"ok" if clicou else "FALHOU"}')
+            if not clicou:
+                return False
+
+            await page.wait_for_timeout(1500)
+            await page.screenshot(path=f'debug_{slug}_depois.png')
+
+            # Navega de volta ao home — isso fecha qualquer modal aberto
             await page.goto(URL_HOME, wait_until='networkidle', timeout=15000)
             await _fechar_modal_se_visivel(page)
             return True
@@ -350,7 +512,7 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
                 print(f'[bot] Sem resultados: {termo}')
                 return False
 
-        # IA escolhe o produto certo
+        # IA escolhe o produto certo entre os resultados da busca
         nomes = await _extrair_nomes_produtos(page)
         print(f'[bot] Produtos para "{termo}": {nomes}')
         idx = await _escolher_produto_ia(nomes, termo, **ai_config)
@@ -361,7 +523,7 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
 
         btn_escolhido = todos_btns.nth(idx)
 
-        # Ajusta quantidade
+        # Quantidade: usa nth(idx) para acertar o produto escolhido pela IA
         if item.quantidade and item.quantidade not in ('', '1'):
             qtd_input = page.locator(SEL_QUANTIDADE).nth(idx)
             if await qtd_input.is_visible():
