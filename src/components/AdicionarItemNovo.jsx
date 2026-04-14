@@ -1,11 +1,21 @@
 import { useState } from 'react'
 import { CATEGORIAS } from '../lib/data'
+import { extrairNomeDaUrl } from '../lib/itemUtils'
 
 export default function AdicionarItemNovo({ onAdicionar }) {
   const [nome, setNome] = useState('')
   const [categoria, setCategoria] = useState('outros')
   const [url, setUrl] = useState('')
   const [aberto, setAberto] = useState(false)
+
+  function handleUrlChange(e) {
+    const novaUrl = e.target.value
+    setUrl(novaUrl)
+    const nomeExtraido = extrairNomeDaUrl(novaUrl)
+    if (nomeExtraido) {
+      setNome(nomeExtraido)
+    }
+  }
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -64,7 +74,7 @@ export default function AdicionarItemNovo({ onAdicionar }) {
             type="url"
             placeholder="Cole o link do produto no Hortisabor (opcional)"
             value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            onChange={handleUrlChange}
             className="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors duration-200"
             style={{ color: '#1C1A16', border: '1px solid #E5DDD0', backgroundColor: '#F2EDE4' }}
           />

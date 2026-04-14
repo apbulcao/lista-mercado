@@ -40,4 +40,22 @@ describe('AdicionarItemNovo', () => {
     fireEvent.click(screen.getByRole('button', { name: /Adicionar/i }))
     expect(onAdicionar).toHaveBeenCalledWith('cream cheese', 'outros', '')
   })
+
+  it('auto-preenche nome ao colar URL do Hortisabor', () => {
+    render(<AdicionarItemNovo onAdicionar={() => {}} />)
+    fireEvent.click(screen.getByText(/item não listado/i))
+    fireEvent.change(screen.getByPlaceholderText(/Cole o link do produto/i), {
+      target: { value: 'https://www.delivery.hortisabor.com.br/produto/35347/peito-peru-perdigao-defumado-100gr' },
+    })
+    expect(screen.getByPlaceholderText('Nome do item').value).toBe('Peito Peru Perdigao Defumado 100gr')
+  })
+
+  it('não preenche nome quando URL não é do Hortisabor', () => {
+    render(<AdicionarItemNovo onAdicionar={() => {}} />)
+    fireEvent.click(screen.getByText(/item não listado/i))
+    fireEvent.change(screen.getByPlaceholderText(/Cole o link do produto/i), {
+      target: { value: 'https://google.com/qualquer-coisa' },
+    })
+    expect(screen.getByPlaceholderText('Nome do item').value).toBe('')
+  })
 })
