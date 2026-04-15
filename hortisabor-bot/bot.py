@@ -428,14 +428,20 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
                 print(f'[bot] AVISO: nenhum botão Adicionar — produto indisponível?')
                 return False
 
-            clicou = await _js_clicar_adicionar(page)
-            print(f'[bot] Clique "Adicionar": {"ok" if clicou else "FALHOU"}')
-            if not clicou:
-                return False
+            # Playwright click (não JS click) — Angular exige evento real do mouse
+            btn_cart = page.locator('button', has_text='Adicionar ao carrinho').first
+            if await btn_cart.is_visible(timeout=3000):
+                await btn_cart.click()
+                print('[bot] Clique "Adicionar ao carrinho": ok (Playwright)')
+            else:
+                clicou = await _js_clicar_adicionar(page)
+                print(f'[bot] Clique "Adicionar" (fallback JS): {"ok" if clicou else "FALHOU"}')
+                if not clicou:
+                    return False
 
             # O site exige seleção de entrega/loja antes de confirmar a adição.
             # Sem confirmar, o item NÃO entra no carrinho.
-            await page.wait_for_timeout(1500)
+            await page.wait_for_timeout(2000)
             confirmou = await _confirmar_modal_entrega(page)
             if confirmou:
                 print(f'[bot] Modal de entrega: {confirmou}')
@@ -535,19 +541,19 @@ async def _confirmar_modal_entrega(page) -> Optional[str]:
     except Exception:
         pass
 
-    # 1. Tenta clicar na primeira loja pelo endereço
-    for texto_loja in ['Tabapuã', 'Luis Ju']:
+    # 1. Tenta clicar no card de loja do modal (botão com nome completo da loja)
+    for texto_loja in ['Hortisabor Itaim Bibi', 'Hortisabor Luís Góis', 'Hortisabor Lu']:
         try:
-            el = page.get_by_text(texto_loja, exact=False).first
-            if await el.is_visible(timeout=800):
-                await el.click()
+            btn = page.locator('button', has_text=texto_loja).first
+            if await btn.is_visible(timeout=800):
+                await btn.click()
                 await page.wait_for_timeout(1500)
                 return f'loja:{texto_loja}'
         except Exception:
             continue
 
     # 2. Tenta botões com texto relevante
-    for texto_btn in ['Retirar', 'Confirmar', 'Selecionar', 'Continuar']:
+    for texto_btn in ['Confirmar', 'Selecionar', 'Continuar', 'continuar e fechar']:
         try:
             btn = page.locator('button', has_text=texto_btn).first
             if await btn.is_visible(timeout=500):
@@ -557,9 +563,9 @@ async def _confirmar_modal_entrega(page) -> Optional[str]:
         except Exception:
             continue
 
-    # 3. Tenta clicar em qualquer elemento com "Hortisabor" (card genérico)
+    # 3. Tenta clicar em qualquer botão com "Hortisabor" (card genérico)
     try:
-        el = page.get_by_text('Hortisabor', exact=False).first
+        el = page.locator('button', has_text='Hortisabor').first
         if await el.is_visible(timeout=500):
             await el.click()
             await page.wait_for_timeout(1500)
