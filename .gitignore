@@ -10,3 +10,5 @@ dist
 tokens.env
 bug-*.jpeg
 bug-*.png
+*_cookies.txt
+*_cookies.json

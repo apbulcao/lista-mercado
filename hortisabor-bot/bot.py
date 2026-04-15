@@ -38,6 +38,11 @@ class FornecerUrlRequest(BaseModel):
     url: str
 
 
+class UploadCookiesRequest(BaseModel):
+    cookies_text: str = ''   # Netscape format (from browser extension)
+    cookies: list = []       # Playwright format (JSON array)
+
+
 class _MontagemState:
     def __init__(self):
         self.estado: str = 'idle'       # idle | processando | aguardando_url | concluido | erro
@@ -926,6 +931,7 @@ async def health():
 async def status():
     return {
         'ok': True,
+        'logged_in': carregar_cookies() is not None,
         'montagem': {
             'estado': _montagem.estado,
             'item_atual': _montagem.item_atual,
@@ -947,6 +953,36 @@ async def fornecer_url(req: FornecerUrlRequest):
     return {'status': 'ok'}
 
 
+@app.post('/upload-cookies')
+async def upload_cookies(req: UploadCookiesRequest):
+    """Recebe cookies do Hortisabor (Netscape text ou JSON) e salva."""
+    cookies = req.cookies
+    if not cookies and req.cookies_text:
+        cookies = []
+        for line in req.cookies_text.strip().splitlines():
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            parts = line.split('\t')
+            if len(parts) < 7:
+                continue
+            domain, _incl, path, secure, expires, name, value = parts[:7]
+            cookies.append({
+                'name': name,
+                'value': value,
+                'domain': domain,
+                'path': path,
+                'expires': int(expires) if expires != '0' else -1,
+                'httpOnly': False,
+                'secure': secure == 'TRUE',
+                'sameSite': 'Lax',
+            })
+    if not cookies:
+        raise HTTPException(status_code=400, detail='Nenhum cookie válido recebido')
+    salvar_cookies(cookies)
+    return {'status': 'ok', 'count': len(cookies)}
+
+
 @app.post('/iniciar-montagem')
 async def iniciar_montagem(req: MontagemRequest):
     if _montagem.estado in ('processando', 'aguardando_url'):
@@ -961,8 +997,8 @@ async def iniciar_montagem(req: MontagemRequest):
             cookies = cookies_login
         else:
             return {
-                'status': 'erro',
-                'mensagem': 'Login falhou. Verifique credenciais HORTISABOR_EMAIL/PASSWORD no servidor.',
+                'status': 'login_needed',
+                'mensagem': 'Login necessário. Faça login no Hortisabor e envie os cookies.',
             }
 
     ai_config = {'provider': req.ai_provider, 'api_key': req.ai_api_key, 'api_url': req.ai_url}

@@ -15,6 +15,7 @@ import AdicionarItemNovo from './components/AdicionarItemNovo'
 import Historico from './components/Historico'
 import ConfigToken, { getToken, getRepo, getAiProvider, getAiApiKey, getAiUrl } from './components/ConfigToken'
 import { botFetch } from './lib/botApi'
+import LoginCookiesUpload from './components/LoginCookiesUpload'
 import WelcomeHeader from './components/WelcomeHeader'
 import SmartInput from './components/SmartInput'
 import FeedbackModal from './components/FeedbackModal'
@@ -364,8 +365,8 @@ export default function App() {
 
       const data = await res.json()
 
-      if (data.status === 'reauth_needed') {
-        setPedidoStatus('reauth')
+      if (data.status === 'reauth_needed' || data.status === 'login_needed') {
+        setPedidoStatus('login_needed')
         return
       }
 
@@ -691,20 +692,11 @@ export default function App() {
               </div>
             )}
 
-            {pedidoStatus === 'reauth' && (
-              <div className="space-y-2">
-                <p className="text-sm font-semibold" style={{ color: '#1A1814' }}>Login necessário</p>
-                <p className="text-xs" style={{ color: '#7A7267' }}>
-                  Uma janela do Chrome abriu. Faça login no Hortisabor e clique em Pedir novamente.
-                </p>
-                <button
-                  onClick={() => setPedidoStatus(null)}
-                  className="text-xs font-medium"
-                  style={{ color: '#7A7267' }}
-                >
-                  Fechar
-                </button>
-              </div>
+            {pedidoStatus === 'login_needed' && (
+              <LoginCookiesUpload
+                onSuccess={() => setPedidoStatus(null)}
+                onClose={() => setPedidoStatus(null)}
+              />
             )}
 
             {pedidoStatus === 'error' && (
