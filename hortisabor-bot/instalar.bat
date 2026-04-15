@@ -8,50 +8,23 @@ echo.
 REM Verifica Python
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Python nao encontrado. Tentando instalar via winget...
-    winget --version >nul 2>&1
-    if %errorlevel% equ 0 (
-        echo.
-        echo Instalando Python 3.11 (pode demorar alguns minutos)...
-        winget install Python.Python.3.11 --silent --accept-package-agreements --accept-source-agreements
-        if %errorlevel% neq 0 (
-            echo ERRO ao instalar Python via winget.
-            echo Abrindo pagina de download manual...
-            start https://www.python.org/downloads/
-            echo.
-            echo INSTRUCOES:
-            echo 1. Baixe e instale o Python
-            echo 2. IMPORTANTE: marque "Add Python to PATH" na instalacao
-            echo 3. Feche esta janela e abra instalar.bat novamente
-            pause
-            exit /b
-        )
-        echo.
-        echo Python instalado com sucesso!
-        echo.
-        echo IMPORTANTE: Feche esta janela e abra instalar.bat novamente
-        echo para que o Python seja reconhecido.
-        pause
-        exit /b
-    ) else (
-        echo winget nao disponivel neste Windows.
-        echo Abrindo pagina de download do Python...
-        start https://www.python.org/downloads/
-        echo.
-        echo INSTRUCOES:
-        echo 1. Baixe e instale o Python
-        echo 2. IMPORTANTE: marque "Add Python to PATH" na instalacao
-        echo 3. Feche esta janela e abra instalar.bat novamente
-        pause
-        exit /b
-    )
+    echo Python nao encontrado.
+    echo.
+    echo COMO INSTALAR (nao precisa de administrador):
+    echo   1. Abra a Microsoft Store (loja do Windows)
+    echo   2. Busque "Python 3.11"
+    echo   3. Clique em "Obter" / "Get"
+    echo   4. Quando terminar, feche esta janela e abra instalar.bat novamente
+    echo.
+    pause
+    exit /b
 )
 
 for /f "tokens=2" %%a in ('python --version 2^>^&1') do echo Python encontrado: versao %%a
 echo.
 
 echo [1/3] Instalando dependencias Python...
-pip install -r "%~dp0requirements.txt"
+python -m pip install --user -r "%~dp0requirements.txt"
 if %errorlevel% neq 0 (
     echo.
     echo ERRO ao instalar dependencias. Verifique sua conexao com a internet.
@@ -62,7 +35,7 @@ echo OK!
 echo.
 
 echo [2/3] Instalando navegador Chromium para o bot...
-playwright install chromium
+python -m playwright install chromium
 if %errorlevel% neq 0 (
     echo.
     echo ERRO ao instalar Chromium.

@@ -27,9 +27,25 @@ echo Abrindo o app no navegador...
 start "" "%APP_URL%"
 echo.
 
+REM Verifica dependencias
+cd /d "%~dp0"
+python -c "import fastapi, uvicorn, playwright" >nul 2>&1
+if %errorlevel% neq 0 (
+    echo.
+    echo ERRO: dependencias nao instaladas.
+    echo Rode instalar.bat primeiro.
+    echo.
+    pause
+    exit /b
+)
+
 REM Inicia o bot
 echo Bot rodando em http://localhost:7430
-echo Para encerrar: feche esta janela
+echo NAO FECHE ESTA JANELA enquanto estiver usando o bot.
 echo.
-cd /d "%~dp0"
-uvicorn bot:app --host 127.0.0.1 --port 7430
+python -m uvicorn bot:app --host 127.0.0.1 --port 7430
+echo.
+echo ============================================
+echo O bot parou. Se foi inesperado, veja o erro acima.
+echo ============================================
+pause
