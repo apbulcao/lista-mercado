@@ -446,7 +446,7 @@ async def _adicionar_item(page, item: ItemRequest, termo: str, ai_config: dict) 
             if confirmou:
                 print(f'[bot] Modal de entrega: {confirmou}')
             else:
-                print('[bot] AVISO: modal de entrega não confirmado')
+                print('[bot] Modal de entrega: não apareceu (loja já selecionada)')
 
             # Navega de volta ao home
             await page.goto(URL_HOME, wait_until='domcontentloaded', timeout=15000)
@@ -615,7 +615,13 @@ async def _ajustar_quantidades_no_carrinho(page, itens: list[ItemRequest]) -> di
     n_obs = sum(1 for _, _, o in itens_para_ajustar if o)
     print(f'[bot] Carrinho: {n_qty} ajuste(s) de qty, {n_obs} observação(ões)')
     await page.goto(URL_CARRINHO, wait_until='domcontentloaded', timeout=15000)
-    await page.wait_for_timeout(2000)  # Aguarda renderização dos itens do carrinho
+    # Espera spinners renderizarem (mais confiável que timeout fixo)
+    try:
+        await page.locator('input.vip-spin__quantity').first.wait_for(
+            state='visible', timeout=15000)
+        await page.wait_for_timeout(1000)  # Margem extra para todos carregarem
+    except Exception:
+        print('[bot] Carrinho: timeout esperando spinners')
     await _fechar_modal_se_visivel(page)
     await page.screenshot(path='debug_carrinho_antes.png')
 
